@@ -1,0 +1,22 @@
+<molecule_dictionary>
+	<molecule symbol="H2O" name="water">
+		<atom name="hydrogen" symbol="H" address="2.0" bonds="1">
+			<bond number="0" address="1.0" />
+		</atom>
+		<atom name="hydrogen" symbol="H" address="2.1" bonds="1">
+			<bond number="0" address="1.1" />
+		</atom>
+		<atom name="oxygen" symbol="O" address="3.0" bonds="2">
+			<bond number="0" address="1.0" />
+			<bond number="1" address="1.1" />
+		</atom>
+	</molecule>
+	<molecule symbol="H2" name="hydrogen gas">
+		<atom name="hydrogen" symbol="H" address="2.0" bonds="1">
+			<bond number="0" address="1.0" />
+		</atom>
+		<atom name="hydrogen" symbol="H" address="2.1" bonds="1">
+			<bond number="0" address="1.0" />
+		</atom>
+	</molecule>
+</molecule_dictionary>
