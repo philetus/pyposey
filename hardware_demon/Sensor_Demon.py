@@ -32,7 +32,7 @@ class Sensor_Demon( Thread ):
     SENSORS = 4 # sensors per socket
     EMITTERS = 11 # emitters per ball
 
-    def __init__( self, sensor_queue=None, serial_port="/dev/ttyUSB0" ):
+    def __init__( self, sensor_queue=None, serial_port="COM5" ):
         """takes sensor queue to write to and xml stream to read from
         """
         Thread.__init__( self )

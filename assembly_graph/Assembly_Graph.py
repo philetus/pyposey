@@ -1,33 +1,40 @@
 from threading import Thread, Lock
 
-from Hub_Node import Hub_Node
-from Strut_Node import Strut_Node
 from pyposey.util.Log import Log
+
+from Assembly_Subgraph import Assembly_Subgraph
 
 class Assembly_Graph( Thread ):
     """pulls assembly events from queue and builds graph
     """
-    LOG = Log( name='pyflexy.assembly_graph.Assembly_Graph', level=Log.DEBUG )
+    LOG = Log( name='pyflexy.assembly_graph.Assembly_Graph', level=Log.INFO )
 
-    EVENTS = ( "create", "destroy", "connect", "disconnect", "configure" )
+    EVENTS = set([ "create", "destroy", "connect", "disconnect", "configure" ])
 
     def __init__( self, event_queue, part_library ):
         Thread.__init__( self )
 
+        # event queue to pull events from
         self.event_queue = event_queue
-        self.part_library = part_library # dictionary of part info by number
-        self.roots = [] # list of root hubs
-        self.nodes = {} # dict of nodes by number
+
+        # part library to generate part by address
+        self.part_library = part_library
+        
+        self.subgraphs = [] # list of subgraphs of connected parts
+        self.parts = {} # dict of parts by address
+        
         self.lock = Lock() # graph modify lock
         self.observers = [] # list of observer functions to call on change
 
     def run( self ):
-        """read events from queue and update scene graph
+        """read events from queue and update node graph
         """        
         while self.event_queue is not None:
 
             # block until event is read
             event = self.event_queue.get()
+
+            self.LOG.debug( "got event: " + str(event) )
 
             # acquire graph modify lock and be sure to release it
             self.lock.acquire()
@@ -50,121 +57,141 @@ class Assembly_Graph( Thread ):
     def _create( self, event ):
         """create new hub node and add it to node set
         """
-        # generate new hub node
-        number = event["hub"]
-        sockets = self.part_library[number]["sockets"]
-        hub = Hub_Node( number=number, sockets=sockets )
+        # create new subgraph to hold new hub
+        subgraph = Assembly_Subgraph()
+        
+        # get new hub from part library
+        address = event["hub"]
+        hub = self.part_library[address]
 
-        # add it to node set and root node list
-        self.nodes[number] = hub
-        self.roots.append( hub )
+        # add hub to part set and subgraph
+        self.parts[address] = hub
+        subgraph.add( hub )
+
+        # add subgraph to subgraphs list
+        self.subgraphs.append( subgraph )
 
     def _destroy( self, event ):
         """remove hub node
-
-           hub should not still be connected, so it should be in root list
-           if hub is not in root list a ValueError is raised
-           if hub does not exist a KeyError is raised
         """
-        number = event["hub"]
-        
-        hub = self.nodes[number]
-        if hub in self.roots:
-            self.roots.remove( hub )
-        del self.nodes[number]
+        address = event["hub"]
+
+        # get hub by address
+        hub = self.parts[address]
+
+        # get hub's subgraph
+        subgraph = hub.subgraph
+
+        # remove hub from parts dictionary
+        del self.parts[address]
+
+        # remove hub from subgraph
+        subgraph.remove( hub )
+
+        # if subgraph is not empty print a warning, otherwise delete it
+        if len( subgraph ) > 0:
+            self.LOG.error( "destroyed hub not disconnected!" )
+        else:
+            self.subgraphs.remove( subgraph )
         
     def _connect( self, event ):
         """connect hub socket to strut ball
         """
-        hub_number = event["hub"]
-        socket_number = event["socket"]
-        strut_number = event["strut"]
-        ball_number = event["ball"]
+        hub_address = event["hub"]
+        socket_index = event["socket"]
+        strut_address = event["strut"]
+        ball_index = event["ball"]
         
         # get hub
-        hub = self.nodes[hub_number]
+        hub = self.parts[hub_address]
 
-        # if strut doesn't exist create it
-        if not self.nodes.has_key( strut_number ):
-            self.nodes[strut_number] = Strut_Node( number=strut_number )
+        # if strut doesn't exist create it and add it to hub's subgraph
+        strut = None
+        if not self.parts.has_key( strut_address ):
+            strut = self.part_library[strut_address]
+            self.parts[strut_address] = strut
+            hub.subgraph.add( strut )
 
-        # get strut
-        strut = self.nodes[strut_number]
+        # otherwise resolve subgraphs
+        else:
+            strut = self.parts[strut_address]
 
-        # if hub is in root node list, and socket is connected to root
-        # already, remove hub from root list
-        if hub in self.roots:
+            # if subgraphs are different move parts from hub's subgraph
+            # to strut's
+            if strut.subgraph is not hub.subgraph:
+                deadgraph = hub.subgraph
+                while len( deadgraph ) > 0:
+                    part = deadgraph.pop()
+                    strut.subgraph.add( part )
+                self.subgraphs.remove( deadgraph )
 
-            # get set of nodes in graph
-            graph_set = self._set_from_graph( strut )
+        # connect ball and socket
+        socket = hub[socket_index]
+        ball = strut[ball_index]
+        socket.connect( ball )
 
-            # get set of other root hubs
-            root_set = set( self.roots ) - set( [hub] )
-
-            if len( graph_set & root_set ) > 0:
-                self.roots.remove( hub )
-        
-        # connect socket to ball
-        hub.connect_socket( number=socket_number,
-                            ball=strut.balls[ball_number] )
-
-
-    def _set_from_graph( self, seed_node ):
-        """traverses graph starting at given node and builds set of all nodes
+    def _set_from_graph( self, seed_part ):
+        """traverses graph starting at given part and builds set of all parts
         """
         visited = set() # nodes in graph that have been visited
-        seen = set([ seed_node ]) # nodes in graph seen but not visited
+        seen = set([ seed_part ]) # nodes in graph seen but not visited
 
         # pop nodes from seen set while it isn't empty
         while seen:
-            node = seen.pop()
+            part = seen.pop()
 
-            # visit node and add unvisited children to seen set
-            for child in node.get_children():
+            # visit part and add unvisited children to seen set
+            for child in part.get_connected():
                 if child not in visited:
                     seen.add( child )
 
-            # add node to visited set
-            visited.add( node )
+            # add part to visited set
+            visited.add( part )
 
         return visited
 
     def _disconnect( self, event ):
-        """disconnect hub socket from strut
+        """disconnect socket of hub from strut
         """
-        hub_number = event["hub"]
-        socket_number = event["socket"]
+        hub_address = event["hub"]
+        socket_index = event["socket"]
     
-        # get hub
-        hub = self.nodes[hub_number]
+        # get hub and socket
+        hub = self.parts[hub_address]
+        socket = hub[socket_index]
 
-        try:
-            
-            # get strut
-            strut = hub.get_connected_strut( socket_number )
+        # get ball and strut
+        ball = socket.ball
+        strut = ball.strut
 
-            # disconnect ball and socket
-            hub.disconnect_socket( socket_number )
-            
-            # if strut has no connections delete it
-            if strut.connected_hubs() == 0:
-                del self.nodes[strut.number]
+        # disconnect socket
+        socket.disconnect()
 
-        except ValueError, error:
-            self.LOG.error( error )
+        # if strut is no longer connected just remove it
+        if len( strut.get_connected() ) < 1:
+            strut.subgraph.remove( strut )
+            del self.parts[strut.address]
+            return
+
+        # if strut subgraph is no longer connected move it to new subgraph
+        strut_graph_set = self._set_from_graph( strut )
+        if hub not in strut_graph_set:
+            subgraph = Assembly_Subgraph()
+            for part in strut_graph_set:
+                hub.subgraph.remove( part )
+                subgraph.add( part )
+            self.subgraphs.append( subgraph )
             
     def _configure( self, event ):
         """change roll, pitch and yaw of socket
         """
         # get hub
-        hub = self.nodes[event["hub"]]
+        hub = self.parts[event["hub"]]
 
         # change socket angle
-        try:
-            hub.set_socket_angle( number=event["socket"],
-                                  roll=event["roll"],
-                                  pitch=event["pitch"],
-                                  yaw=event["yaw"] )
-        except ValueError, error:
-            self.LOG.error( error )
+        socket_index = event["socket"]
+        socket = hub[socket_index]
+        socket.set_angle( roll=event["roll"],
+                          pitch=event["pitch"],
+                          yaw=event["yaw"] )
         
