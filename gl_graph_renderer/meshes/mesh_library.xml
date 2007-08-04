@@ -1,0 +1,21 @@
+<mesh_library>
+    <stl_mesh name="dinosaur_head"
+        part_type="one hub"
+        stl_file="dinosaur_head.stl"
+        specular = "1.0, 1.0, 1.0, 1.0"
+        shininess = "100.0"
+        diffuse = "0.0, 0.7, 0.1, 1.0"
+        thumbnail_file="dinosaur_head_thumbnail.png"
+        parent_angles="(0.0, 0.0, 0.0)"
+        parent_offsets="0.0"
+    />
+    <textured_mesh name="bear_head"
+        part_type="one hub"
+        geometry_file="bear_head.txt"
+        texture_file="bear_head_texture.png"
+        thumbnail_file="bear_head_thumbnail.png"
+        parent_angles="(0.0, 0.0, 0.0)"
+        parent_offsets="0.0"
+        scale="30.0, 30.0, 30.0"
+    />
+</mesh_library>

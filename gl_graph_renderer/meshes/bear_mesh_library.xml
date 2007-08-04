@@ -1,0 +1,91 @@
+<mesh_library>
+    <textured_mesh name="bear_head"
+        part_type="one hub"
+        geometry_file="bear_head.txt"
+        texture_file="bear_head_texture.png"
+        thumbnail_file="bear_head_thumbnail.png"
+        parent_angles="(0.0, 0.0, 0.0)"
+        parent_offsets="0.0"
+        scale="30.0, 30.0, 30.0"
+    />
+    <textured_mesh
+        name="bear_left_arm"
+        part_type="strut"
+        geometry_file="bear_arm_left.txt"
+        texture_file="bear_arm_texture.png"
+        thumbnail_file="bear_arm_thumbnail.png"
+        parent_angles="(0., 0., 180.), (180., 0., 0.)"
+        parent_offsets="0.0, 143.0"
+        scale="30.0, 30.0, 30.0"
+    />
+    <textured_mesh
+        name="bear_right_arm"
+        part_type="strut"
+        geometry_file="bear_arm_right.txt"
+        texture_file="bear_arm_texture.png"
+        thumbnail_file="bear_arm_thumbnail.png"
+        parent_angles="(0., 0., 180.), (180., 0., 0.)"
+        parent_offsets="0.0, 143.0"
+        scale="30.0, 30.0, 30.0"
+    />
+    <textured_mesh
+        name="bear_left_leg"
+        part_type="strut"
+        geometry_file="bear_leg_left.txt"
+        texture_file="bear_leg_texture.png"
+        thumbnail_file="bear_leg_thumbnail.png"
+        parent_angles="(0., 0., 180.), (180., 0., 0.)"
+        parent_offsets="0.0, 143.0"
+        scale="30.0, 30.0, 30.0"
+    />
+    <textured_mesh
+        name="bear_right_leg"
+        part_type="strut"
+        geometry_file="bear_leg_right.txt"
+        texture_file="bear_leg_texture.png"
+        thumbnail_file="bear_leg_thumbnail.png"
+        parent_angles="(0., 0., 180.), (180., 0., 0.)"
+        parent_offsets="0.0, 143.0"
+        scale="30.0, 30.0, 30.0"
+    />
+    <textured_mesh
+        name="bear_neck"
+        part_type="strut"
+        geometry_file="bear_neck.txt"
+        texture_file="bear_torso_texture.png"
+        thumbnail_file="bear_chest_thumbnail.png"
+        parent_angles="(0., 0., 180.), (180., 0., 0.)"
+        parent_offsets="0.0, 143.0"
+        scale="30.0, 30.0, 30.0"
+    />
+    <textured_mesh
+        name="bear_chest"
+        part_type="four hub"
+        geometry_file="bear_chest.txt"
+        texture_file="bear_torso_texture.png"
+        thumbnail_file="bear_chest_thumbnail.png"
+        parent_angles="(0., 0., 0.), (0., 0., 90.), (0., 0., 180.), (0., 0., 270.)"
+        parent_offsets="60.97, 60.97, 60.97, 60.97"
+        scale="30.0, 30.0, 30.0"
+    />
+    <textured_mesh
+        name="bear_abdomen"
+        part_type="strut"
+        geometry_file="bear_abdomen.txt"
+        texture_file="bear_torso_texture.png"
+        thumbnail_file="bear_chest_thumbnail.png"
+        parent_angles="(0., 0., 180.), (180., 0., 0.)"
+        parent_offsets="0.0, 143.0"
+        scale="30.0, 30.0, 30.0"
+    />
+    <textured_mesh
+        name="bear_waist"
+        part_type="three hub"
+        geometry_file="bear_waist.txt"
+        texture_file="bear_torso_texture.png"
+        thumbnail_file="bear_chest_thumbnail.png"
+        parent_angles="(0., 0., 0.), (0., 0., 120.), (0., 0., 240.)"
+        parent_offsets="60.97, 60.97, 60.97"
+        scale="30.0, 30.0, 30.0"
+    />
+</mesh_library>

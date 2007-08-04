@@ -1,0 +1,32 @@
+<mesh_library>
+    <stl_mesh name="graphics strut"
+        part_type="strut"
+        stl_file="graphics_strut.stl"
+        thumbnail_file="graphics_strut_thumbnail.png"
+        specular="1.0, 1.0, 1.0, 1.0"
+        shininess="100.0"
+        diffuse="0.4, 0.4, 0.5, 1.0"
+        parent_angles="(0., 0., 180.), (180., 0., 0.)"
+        parent_offsets="0.0, 143.0"
+    />
+    <stl_mesh name="graphics one hub"
+        part_type="one hub"
+        stl_file="graphics_one_hub.stl"
+        thumbnail_file="graphics_one_hub_thumbnail.png"
+        specular="1.0, 1.0, 1.0, 1.0"
+        shininess="100.0"
+        diffuse="0.7, 0.8, 0.1, 1.0"
+        parent_angles="(0.0, 0.0, 0.0)"
+        parent_offsets="0.0"
+    />
+    <stl_mesh name="graphics four hub"
+        part_type="four hub"
+        stl_file="graphics_four_hub.stl"
+        thumbnail_file="graphics_four_hub_thumbnail.png"
+        specular="1.0, 1.0, 1.0, 1.0"
+        shininess="100.0"
+        diffuse="0.0, 0.1, 0.7, 1.0"
+        parent_angles="(0., 0., 0.), (0., 0., 90.), (0., 0., 180.), (0., 0., 270.)"
+        parent_offsets="60.97, 60.97, 60.97, 60.97"
+    />
+</mesh_library>
