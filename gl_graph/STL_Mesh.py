@@ -14,6 +14,9 @@ class STL_Mesh( object ):
     def __init__( self, name, part_type, stl_file, thumbnail_file,
                   specular, shininess, diffuse, parent_angles, parent_offsets,
                   scale=(1.0, 1.0, 1.0) ):
+        self.name = name
+        self.part_type = part_type
+        
         self.triangles = None # list of triangles in mesh
         self.size = None # number of triangles in mesh
         self.list_name = None # gl display list name

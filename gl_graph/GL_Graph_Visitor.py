@@ -9,8 +9,7 @@ from pyposey.util.Log import Log
 class GL_Graph_Visitor:
     """renders assembly graph with opengl
     """
-    LOG = Log( name='pyposey.gl_graph_visitor.GL_Graph_Visitor',
-               level=Log.INFO )
+    LOG = Log( name='puppet_show.GL_Graph_Renderer', level=Log.INFO )
 
     ROOT_OFFSET = (200., 0., 0.)
     ROTATION_AXIS = (0., 0., 1.)
@@ -31,7 +30,7 @@ class GL_Graph_Visitor:
         self.graph.lock.acquire()
         try:
 
-            for hub in self.graph.roots:
+            for hub in ( subgraph.root for subgraph in self.graph.subgraphs ):
 
                 # remember this spot
                 glPushMatrix()
@@ -63,11 +62,13 @@ class GL_Graph_Visitor:
     def _visit_hub( self, hub ):
         """draw hub and visit its children
         """
+        self.LOG.debug(  "visiting hub ", hub.address )
+        
         # add to visited set
         self.visited.add( hub )
         
         # render hub
-        self.hub_meshes[len(hub.sockets)].draw()
+        hub.draw()
 
         # visit children
         for socket in hub.sockets:
@@ -78,19 +79,17 @@ class GL_Graph_Visitor:
                 glPushMatrix()
 
                 # move to socket
-                glRotatef( socket.parent_angle, *self.ROTATION_AXIS )
+                glRotatef( socket.parent_angle[2], *self.ROTATION_AXIS )
                 glTranslatef( socket.parent_offset, 0., 0. )
 
-                # set roll, pitch and yaw
-                r, p, y = [ sum(_range) / 2. for _range in socket.angle ]
-
                 # rotate into strut
-                self._rotate_in( r, p, y )
+                self._rotate_in( *socket.angle )
 
                 # move to strut
                 glTranslatef( ball.parent_offset, 0., 0. )
-                glRotatef( 180. - ball.parent_angle, *self.ROTATION_AXIS )
-                glRotatef( ball.parent_roll, 1.0, 0.0, 0.0 )
+                glRotatef( 180. - ball.parent_angle[2],
+                           *self.ROTATION_AXIS )
+                glRotatef( ball.parent_angle[0], 1.0, 0.0, 0.0 )
 
                 # visit strut
                 self._visit_strut( ball.strut )
@@ -101,11 +100,13 @@ class GL_Graph_Visitor:
     def _visit_strut( self, strut ):
         """draw strut and visit its children
         """
+        self.LOG.debug(  "visiting strut ", strut.address )
+        
         # add to visited set
         self.visited.add( strut )
 
         # render strut
-        self.strut_mesh.draw()
+        strut.draw()
 
         # visit children
         for ball in strut.balls:
@@ -116,19 +117,17 @@ class GL_Graph_Visitor:
                 glPushMatrix()
 
                 # move to ball
-                glRotatef( ball.parent_angle, *self.ROTATION_AXIS )
+                glRotatef( ball.parent_angle[2], *self.ROTATION_AXIS )
                 glTranslatef( ball.parent_offset, 0., 0. )
-                glRotatef( ball.parent_roll, 1.0, 0.0, 0.0 )
-
-                # yaw, pitch and roll back to socket orientation
-                r, p, y = [ sum(_range) / 2. for _range in socket.angle ]
+                glRotatef( ball.parent_angle[0], 1.0, 0.0, 0.0 )
 
                 # rotate out of strut
-                self._rotate_out( r, p, y )
+                self._rotate_out( *socket.angle )
 
                 # move to hub
                 glTranslatef( socket.parent_offset, 0., 0. )
-                glRotatef( 180.0 - socket.parent_angle, *self.ROTATION_AXIS )
+                glRotatef( 180.0 - socket.parent_angle[2],
+                           *self.ROTATION_AXIS )
 
                 # visit hub
                 self._visit_hub( socket.hub )

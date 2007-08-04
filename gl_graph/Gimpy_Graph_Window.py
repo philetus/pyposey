@@ -26,11 +26,11 @@ class Gimpy_Graph_Window( gtk.Window ):
 
 
         # load gl graph renderer to render assembly graph
-        self.graph_renderer = GL_Graph_Renderer( self.assembly_graph )
+        self.graph_visitor = GL_Graph_Visitor( self.assembly_graph )
 
         # set title and size
         self.set_title( title )
-        self.set_size( *size )
+        self.resize( *size )
 
         # ???
         self.set_reallocate_redraws( True )
@@ -54,16 +54,16 @@ class Gimpy_Graph_Window( gtk.Window ):
         pass
 
     def handle_draw( self ):
-        """call gl graph renderer to render assembly graph
+        """call gl graph visitor to render assembly graph
         """
-        self.graph_renderer.draw()
+        self.graph_visitor.draw()
 
     def redraw( self ):
         """add a redraw request to opengl widget event queue
         """
         self.camera.queue_draw()
 
-    def _on_quit( self ):
+    def _on_quit( self, widget ):
         self.handle_quit()
         gtk.main_quit()
         
