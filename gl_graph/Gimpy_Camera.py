@@ -28,6 +28,10 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
         self.connect( "button_press_event", self._on_press )
         self.connect( "button_release_event", self._on_release )
 
+        # width and height
+        self.width = 1
+        self.height = 1
+
         # for rotating view
         self.rotation = [ 0, 0, 0 ]
 
@@ -49,6 +53,69 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
         """
         rect = self.get_allocation()       
         return rect.width, rect.height
+
+    def select( self, x, y, box=(2, 2), buffer_size=512 ):
+        """returns list of names of objects under pointer
+        """
+        name_buffer = None
+        
+        # call gl begin or die trying
+        gl_context = self.get_gl_context()
+        gl_drawable = self.get_gl_drawable()
+        assert gl_drawable.gl_begin( gl_context ), \
+               "couldn't gl begin in _on_expose()"
+        
+        try:
+            # set up selection mode
+            glMatrixMode( GL_PROJECTION )
+            glLoadIdentity()
+            gluPickMatrix( x, y, *box )
+
+            
+            # set projection view
+            #self._set_view()
+            #viewport = glGetIntegerv( GL_VIEWPORT )
+            #print "viewport:", viewport
+
+            # calculate left/right and top/bottom clipping planes based the
+            # smallest square viewport
+            a = self.zoom / min( self.width, self.height )
+            clipping_planes = ( a * self.width, a * self.height )
+            
+            # setup the projection
+            glFrustum(-clipping_planes[0], clipping_planes[0],
+                      -clipping_planes[1], clipping_planes[1],
+                      self.clip[0], self.clip[1] )
+
+            glInitNames()
+            glSelectBuffer( buffer_size )
+            glRenderMode( GL_SELECT )
+
+            # Set up the model view matrix
+            glMatrixMode( GL_MODELVIEW )
+            glLoadIdentity()
+
+            gluLookAt( *self.focus )
+            glTranslatef( *self.eye )
+
+            glRotatef( self.rotation[0], 0.0, 1.0, 0.0 )
+            glRotatef( self.rotation[1], 1.0, 0.0, 0.0 )
+            glRotatef( self.rotation[2], 0.0, 0.0, 1.0 )
+
+            # draw objects to selection buffer
+            self.handle_draw()
+
+            # get list of names and restore render mode
+            glFlush()
+            name_buffer = glRenderMode( GL_RENDER )
+            
+            #gl_drawable.swap_buffers()
+
+        finally:
+            gl_drawable.gl_end()
+
+        return list( name_buffer )
+        
 
     def handle_init_gl( self ):
         """set up opengl lighting and such
@@ -105,6 +172,7 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
         """do something when pointer button is pressed
         """
         print "button pressed at %d, %d" % (x, y)
+        print self.select( x, y )
 
     def handle_release( self, x, y ):
         """do something when pointer button is released
@@ -182,6 +250,9 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
             # ???
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
+            # set projection view
+            self._set_view()
+
             # Set up the model view matrix
             glMatrixMode( GL_MODELVIEW )
             glLoadIdentity()
@@ -195,10 +266,6 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
 
             # call draw handler to draw world
             self.handle_draw()
-
-
-            # set view
-            self._set_view()
 
             # swap or flush buffer
             if gl_drawable.is_double_buffered():
@@ -222,8 +289,8 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
         try:
 
             # resize gl viewport to fill camera window
-            width, height = self.get_size()
-            glViewport(0, 0, width, height)
+            self.width, self.height = self.get_size()
+            glViewport(0, 0, self.width, self.height)
 
             self._set_view()
 
@@ -241,7 +308,7 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
 
     def _on_press( self, drawing_area, event ):
         self.pointer_down = True
-        self.handle_press( event.x, event.y )
+        self.handle_press( event.x, self.height - event.y )
 
     def _on_release( self, drawing_area, event ):
         self.pointer_down = False

@@ -48,6 +48,9 @@ class Gimpy_Graph_Window( gtk.Window ):
         # add redraw call to assembly graph observer methods
         self.assembly_graph.observers.append( self.redraw )
 
+        # variable to hold currently selected graph node
+        self.selected = None
+
     def handle_quit( self ):
         """do some stuff when window is closed
         """

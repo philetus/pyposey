@@ -1,6 +1,8 @@
 from pyposey.assembly_graph.Hub import Hub
 
-class Mesh_Hub( Hub ):
+from Mesh_Node import Mesh_Node
+
+class Mesh_Hub( Hub, Mesh_Node ):
     """
     """
 
@@ -8,16 +10,5 @@ class Mesh_Hub( Hub ):
         """
         """
         Hub.__init__( self, address, children, part_type, rootness )
-
-        self.mesh = None
-
-    def set_mesh( self, mesh ):
-        """
-        """
-        self.mesh = mesh
-        for i, socket in enumerate( self.sockets ):
-            socket.parent_angle = mesh.parent_angles[i]
-            socket.parent_offset = mesh.parent_offsets[i]
-
-    def draw( self ):
-        self.mesh.draw()
+        self.connectors = self.sockets # alias sockets for mesh node
+        Mesh_Node.__init__( self, address )
