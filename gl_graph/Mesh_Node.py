@@ -9,6 +9,7 @@ class Mesh_Node( object ):
         """
         self.gl_name = (int(self.address[0]) * 256) + int(self.address[1])
         self.mesh = None
+        self.selected = False
 
     def set_mesh( self, mesh ):
         """
@@ -20,5 +21,5 @@ class Mesh_Node( object ):
 
     def draw( self ):
         glPushName( self.gl_name )
-        self.mesh.draw()
+        self.mesh.draw( selected=self.selected )
         glPopName()

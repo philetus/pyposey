@@ -160,7 +160,7 @@ class Textured_Mesh:
                 
         glEndList()
 
-    def draw( self ):
+    def draw( self, selected=False ):
         """draw textured mesh to opengl by calling display list
         """
         # preserve existing opengl settings

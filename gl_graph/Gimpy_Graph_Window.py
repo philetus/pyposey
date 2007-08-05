@@ -42,8 +42,9 @@ class Gimpy_Graph_Window( gtk.Window ):
         self.camera = Gimpy_Camera()        
         self.add( self.camera )
 
-        # connect camera draw handler to local method
+        # connect camera handlers to local methods
         self.camera.handle_draw = self.handle_draw
+        self.camera.handle_press = self.handle_press
 
         # add redraw call to assembly graph observer methods
         self.assembly_graph.observers.append( self.redraw )
@@ -61,6 +62,29 @@ class Gimpy_Graph_Window( gtk.Window ):
         """
         self.graph_visitor.draw()
 
+    def handle_press( self, x, y ):
+        """set selected graph node when pointer is pressed
+        """
+        # clear currently selected node
+        if self.selected is not None:
+            self.selected.selected = False
+            self.selected = None
+
+        # get list of gl names sorted by depth
+        gl_names = self.camera.select( x, y )
+
+        # if there were nodes under pointer get address from top gl name
+        # and select node
+        if gl_names:
+            gl_name = gl_names[0]
+            address = (gl_name / 256), (gl_name % 256)
+            node = self.assembly_graph[address]
+            self.selected = node
+            node.selected = True
+
+        # redraw window
+        self.redraw()
+        
     def redraw( self ):
         """add a redraw request to opengl widget event queue
         """

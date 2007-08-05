@@ -26,6 +26,9 @@ class Assembly_Graph( Thread ):
         self.lock = Lock() # graph modify lock
         self.observers = [] # list of observer functions to call on change
 
+    def __getitem__( self, key ):
+        return self.parts[key]
+
     def run( self ):
         """read events from queue and update node graph
         """        

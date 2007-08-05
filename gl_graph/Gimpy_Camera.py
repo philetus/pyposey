@@ -55,9 +55,11 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
         return rect.width, rect.height
 
     def select( self, x, y, box=(2, 2), buffer_size=512 ):
-        """returns list of names of objects under pointer
+        """returns list of gl names of objects at given screen coords
+
+           gl names are ordered from nearest to furthest
         """
-        name_buffer = None
+        select_buffer = None
         
         # call gl begin or die trying
         gl_context = self.get_gl_context()
@@ -66,55 +68,33 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
                "couldn't gl begin in _on_expose()"
         
         try:
-            # set up selection mode
+            # set up pick matrix
             glMatrixMode( GL_PROJECTION )
             glLoadIdentity()
             gluPickMatrix( x, y, *box )
 
-            
-            # set projection view
-            #self._set_view()
-            #viewport = glGetIntegerv( GL_VIEWPORT )
-            #print "viewport:", viewport
+            # set projection view but don't clear pick matrix
+            self._set_projection_view( init=False )
 
-            # calculate left/right and top/bottom clipping planes based the
-            # smallest square viewport
-            a = self.zoom / min( self.width, self.height )
-            clipping_planes = ( a * self.width, a * self.height )
-            
-            # setup the projection
-            glFrustum(-clipping_planes[0], clipping_planes[0],
-                      -clipping_planes[1], clipping_planes[1],
-                      self.clip[0], self.clip[1] )
-
+            # init selection render mode
             glInitNames()
             glSelectBuffer( buffer_size )
             glRenderMode( GL_SELECT )
 
-            # Set up the model view matrix
-            glMatrixMode( GL_MODELVIEW )
-            glLoadIdentity()
-
-            gluLookAt( *self.focus )
-            glTranslatef( *self.eye )
-
-            glRotatef( self.rotation[0], 0.0, 1.0, 0.0 )
-            glRotatef( self.rotation[1], 1.0, 0.0, 0.0 )
-            glRotatef( self.rotation[2], 0.0, 0.0, 1.0 )
+            # set model view
+            self._set_model_view()
 
             # draw objects to selection buffer
             self.handle_draw()
 
             # get list of names and restore render mode
             glFlush()
-            name_buffer = glRenderMode( GL_RENDER )
+            select_buffer = glRenderMode( GL_RENDER )
             
-            #gl_drawable.swap_buffers()
-
         finally:
             gl_drawable.gl_end()
 
-        return list( name_buffer )
+        return self._sort_gl_names( select_buffer )
         
 
     def handle_init_gl( self ):
@@ -142,11 +122,9 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
         glEnable(GL_TEXTURE_2D)
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-
-        self._set_view()
         
     def handle_draw( self ):
-        """override to draw something
+        """override to draw something besides a teapot
         """
         glMaterialfv( GL_FRONT, GL_SPECULAR, (1.0, 1.0, 1.0, 1.0) )
         glMaterialfv( GL_FRONT, GL_SHININESS, 100.0 )
@@ -203,22 +181,40 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
                          gtk.gdk.BUTTON_RELEASE_MASK |
                          gtk.gdk.BUTTON_PRESS_MASK )
 
-    def _set_view( self ):
-        width, height = self.get_size()
-
-        glMatrixMode(GL_PROJECTION)
-        glLoadIdentity()
+    def _set_projection_view( self, init=True ):
+        """set up perspective view matrix
+        """
+        # if init is set go into projection matrix mode and clear matrix
+        if init:
+            glMatrixMode(GL_PROJECTION)
+            glLoadIdentity()
 
         # calculate left/right and top/bottom clipping planes based the
         # smallest square viewport
-        a = self.zoom / min( width, height )
-        clipping_planes = ( a * width, a * height )
+        a = self.zoom / min( self.width, self.height )
+        clipping_planes = ( a * self.width, a * self.height )
         
         # setup the projection
         glFrustum(-clipping_planes[0], clipping_planes[0],
                   -clipping_planes[1], clipping_planes[1],
                   self.clip[0], self.clip[1] )
-        
+
+    def _set_model_view( self, init=True ):
+        """set up model view matrix
+        """
+        # if init arg is set go into model view matrix mode and clear matrix
+        if init:
+            # Set up the model view matrix
+            glMatrixMode( GL_MODELVIEW )
+            glLoadIdentity()
+
+        gluLookAt( *self.focus )
+        glTranslatef( *self.eye )
+
+        glRotatef( self.rotation[0], 0.0, 1.0, 0.0 )
+        glRotatef( self.rotation[1], 1.0, 0.0, 0.0 )
+        glRotatef( self.rotation[2], 0.0, 0.0, 1.0 )
+            
     ###
     ### private functions to map gtk events to canvas handlers
     ###
@@ -250,19 +246,11 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
             # ???
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-            # set projection view
-            self._set_view()
+            # set up projection view matrix
+            self._set_projection_view()
 
-            # Set up the model view matrix
-            glMatrixMode( GL_MODELVIEW )
-            glLoadIdentity()
-
-            gluLookAt( *self.focus )
-            glTranslatef( *self.eye )
-
-            glRotatef( self.rotation[0], 0.0, 1.0, 0.0 )
-            glRotatef( self.rotation[1], 1.0, 0.0, 0.0 )
-            glRotatef( self.rotation[2], 0.0, 0.0, 1.0 )
+            # set up the model view matrix
+            self._set_model_view()
 
             # call draw handler to draw world
             self.handle_draw()
@@ -290,9 +278,7 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
 
             # resize gl viewport to fill camera window
             self.width, self.height = self.get_size()
-            glViewport(0, 0, self.width, self.height)
-
-            self._set_view()
+            glViewport( 0, 0, self.width, self.height )
 
             # call resize handler
             self.handle_resize()
@@ -324,3 +310,19 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
 
         return wrapper
 
+    def _sort_gl_names( self, select_buffer ):
+        """sort top names from each name stack by minimum depth, near to far
+        """
+        # put names in dictionary by minimum depth
+        names_by_depth = {}
+        for selection in select_buffer:
+            names_by_depth[selection[0]] = selection[-1][-1]
+
+        # add to list by depth
+        depths = names_by_depth.keys()
+        depths.sort()
+        names = []
+        for depth in depths:
+            names.append( int(names_by_depth[depth]) )
+
+        return names

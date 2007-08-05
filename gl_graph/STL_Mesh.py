@@ -24,6 +24,7 @@ class STL_Mesh( object ):
         self.specular = specular
         self.shininess = shininess
         self.diffuse = diffuse
+        self.diffuse_selected = ( 0.8, 0.4, 0.1, 1.0 )
 
         self.parent_angles = parent_angles
         self.parent_offsets = parent_offsets
@@ -47,7 +48,6 @@ class STL_Mesh( object ):
         # set material
         glMaterialfv( GL_FRONT, GL_SPECULAR, self.specular )
         glMaterialfv( GL_FRONT, GL_SHININESS, self.shininess )
-        glMaterialfv( GL_FRONT, GL_DIFFUSE, self.diffuse )
         
         # start list of triangles in mesh
         glBegin( GL_TRIANGLES )
@@ -61,7 +61,7 @@ class STL_Mesh( object ):
         glEnd()
         glEndList()
 
-    def draw( self ):
+    def draw( self, selected=False ):
         """draw stl mesh by executing opengl display list
         """
         # preserve opengl settings
@@ -70,6 +70,13 @@ class STL_Mesh( object ):
         if self.list_name is None:
             self._make_list()
 
+        # if mesh is selected use selected diffuse color
+        if selected:
+            glMaterialfv( GL_FRONT, GL_DIFFUSE, self.diffuse_selected )
+        else:
+            glMaterialfv( GL_FRONT, GL_DIFFUSE, self.diffuse )
+            
+        # call display list to render mesh
         glCallList( self.list_name )
 
         # restore opengl settings
