@@ -71,7 +71,8 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
             # set up pick matrix
             glMatrixMode( GL_PROJECTION )
             glLoadIdentity()
-            gluPickMatrix( x, y, *box )
+            gluPickMatrix( x, y, box[0], box[1],
+                           (0, 0, self.width, self.height) )
 
             # set projection view but don't clear pick matrix
             self._set_projection_view( init=False )
