@@ -3,7 +3,6 @@ from xml import sax
 class Part_Library( sax.handler.ContentHandler ):
     """library loads given hub and strut classes with data from a config file
     """
-
     STRUT_TYPES = set([ "strut" ])
     HUB_TYPES = set([ "one hub", "two hub", "three hub", "four hub" ])
     

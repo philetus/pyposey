@@ -10,7 +10,7 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
        queue_draw() adds redraw request to event queue
     """
 
-    def __init__( self ):          
+    def __init__( self ):
         # call superclass constructor
         gtk.DrawingArea.__init__( self )
 
@@ -111,8 +111,8 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
         
         glEnable(GL_LIGHTING)
         glEnable(GL_LIGHT0)
+        
         glEnable(GL_DEPTH_TEST)
-
         glShadeModel(GL_SMOOTH)
         glEnable(GL_AUTO_NORMAL)
 
@@ -120,9 +120,10 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
         glClearDepth(1.0)
 
         # set up texturing
-        glEnable(GL_TEXTURE_2D)
+        # glEnable(GL_TEXTURE_2D)
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
         
     def handle_draw( self ):
         """override to draw something besides a teapot
@@ -219,8 +220,10 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
     ###
     ### private functions to map gtk events to canvas handlers
     ###
-
+    
     def _on_realize( self, widget ):
+        """Called by GTK when widget is displayed on screen
+        """
         # call gl begin or die trying
         gl_context = self.get_gl_context()
         gl_drawable = self.get_gl_drawable()
@@ -236,6 +239,8 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
             gl_drawable.gl_end()
         
     def _on_expose( self, gl_area, event ):
+        """Called by GTK to redraw widget
+        """
         # call gl begin or die trying
         gl_context = self.get_gl_context()
         gl_drawable = self.get_gl_drawable()

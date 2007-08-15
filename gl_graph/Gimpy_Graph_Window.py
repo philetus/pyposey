@@ -69,7 +69,7 @@ class Gimpy_Graph_Window( gtk.Window ):
         if self.selected is not None:
             self.selected.selected = False
             self.selected = None
-
+        
         # get list of gl names sorted by depth
         gl_names = self.camera.select( x, y )
 

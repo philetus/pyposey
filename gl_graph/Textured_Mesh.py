@@ -1,6 +1,7 @@
 from OpenGL.GL import *
 import Image
 import gtk
+from math import *
 
 class Textured_Mesh:
     """texture mapped model rendered in opengl
@@ -14,11 +15,13 @@ class Textured_Mesh:
     def __init__( self, name, part_type, geometry_file, texture_file,
                   thumbnail_file, parent_angles, parent_offsets,
                   scale=(1.0, 1.0, 1.0) ):
+        
         self.name = name
         self.part_type = part_type
         self.parent_angles = parent_angles
         self.parent_offsets = parent_offsets
         self.scale = scale
+        self.flip = 0
         
         self.centroid = None
 
@@ -30,7 +33,7 @@ class Textured_Mesh:
         self.faces = None
         self.uv_coords = None
         self._extract_geometry( geometry_file )
-
+        
         # load texture image from file
         self.texture_size = None
         self.texture = None
@@ -43,6 +46,10 @@ class Textured_Mesh:
         # opengl texture id and display list for textured mesh
         self.texture_id = None
         self.display_list = None
+
+        self.diffuse = (1.0, 1.0, 1.0, 1.0)
+        self.diffuse_selected = ( 0.8, 0.4, 0.1, 1.0 )
+        
 
     def _extract_geometry( self, geometry_file ):
         """extract vertices, faces and uv coords from blender geometry file
@@ -132,46 +139,75 @@ class Textured_Mesh:
         # create new display list
         self.display_list = glGenLists( 1 )
         glNewList( self.display_list, GL_COMPILE )
-
         # load texture map
         glBindTexture( GL_TEXTURE_2D, self.texture_id )
 
+        # Multiply by rotation matrix
+        for vertex in enumerate(self.vertices):
+            # Rotate pi/2 about Z
+            # x = vertex[1][0]*cos(phi) - vertex[1][1]*sin(phi)
+            # y = vertex[1][0]*sin(phi) + vertex[1][1]*cos(phi)
+            # Rotate pi/2 about Y
+            # x = vertex[1][0]*cos(phi) + vertex[1][2]*sin(phi)
+            # z = vertex[1][2]*cos(phi) - vertex[1][0]*sin(phi)
+            # Rotate pi/2 about X
+            y = vertex[1][1]*cos(pi/2) - vertex[1][2]*sin(pi/2)
+            z = vertex[1][1]*sin(pi/2) + vertex[1][2]*cos(pi/2)
+            vertex[1][1] = y
+            vertex[1][2] = z
+                
         # generate opengl calls for each face of the mesh
         for i, face in enumerate( self.faces ):
-
             face_vertices = [
                 self.vertices[face[j] - 1] for j in range(len(face)) ]
             face_uv_coords = self.uv_coords[i]
-
+            
             if len( face ) == 3:
                 glBegin( GL_TRIANGLES )
+            
             elif len( face ) == 4:
                 glBegin(GL_QUADS)
+                
             else:
                 raise ValueError( "Can't generate textured mesh: "
                                   + "face must have 3 or 4 vertices!" )
 
-            for j in range( len(face) ):
-            
+            for j in range( len(face) ):          
                 glTexCoord2f( *face_uv_coords[j] )
                 glVertex3f( *face_vertices[j] )
-                            
+                               
             glEnd()
-                
+            
         glEndList()
 
-    def draw( self, selected=False ):
+    def draw( self, selected=False, flip=0 ):
         """draw textured mesh to opengl by calling display list
-        """
+        """        
+        glEnable(GL_TEXTURE_2D)
         # preserve existing opengl settings
         glPushMatrix()
 
         # if display list has not been generated generate it
+        """
         if self.display_list is None:
             self._generate_display_list()
+        """
+        if self.display_list is None or flip != self.flip:
+            self._generate_display_list()
+            self.flip = flip
+
+        # if mesh is selected use selected diffuse color
+        if selected:
+            glMaterialfv( GL_FRONT, GL_DIFFUSE, self.diffuse_selected )
+        else:
+            glMaterialfv( GL_FRONT, GL_DIFFUSE, self.diffuse )
 
         # call display list to draw mesh to screen
         glCallList( self.display_list )
 
         # restore opengl settings
         glPopMatrix()
+        glDisable(GL_TEXTURE_2D)
+        # self.flip = (self.flip+1)%4
+
+        

@@ -61,7 +61,7 @@ class STL_Mesh( object ):
         glEnd()
         glEndList()
 
-    def draw( self, selected=False ):
+    def draw( self, selected=False, flip=0 ):
         """draw stl mesh by executing opengl display list
         """
         # preserve opengl settings

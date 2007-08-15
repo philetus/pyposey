@@ -10,6 +10,7 @@ class Mesh_Node( object ):
         self.gl_name = (int(self.address[0]) * 256) + int(self.address[1])
         self.mesh = None
         self.selected = False
+        self.flip = 0
 
     def set_mesh( self, mesh ):
         """
@@ -21,5 +22,9 @@ class Mesh_Node( object ):
 
     def draw( self ):
         glPushName( self.gl_name )
-        self.mesh.draw( selected=self.selected )
+        self.mesh.draw( selected=self.selected, flip=self.flip )
         glPopName()
+
+    def inc_flip(self):
+        self.flip = (self.flip+1) %4 
+        
