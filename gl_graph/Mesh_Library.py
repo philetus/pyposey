@@ -23,7 +23,6 @@ class Mesh_Library( sax.handler.ContentHandler ):
 
         # open library file
         library_file = open( path.join(folder, filename) )
-
         if self.statusbar:
             print "meshes[",
 

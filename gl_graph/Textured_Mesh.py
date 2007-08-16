@@ -141,20 +141,6 @@ class Textured_Mesh:
         glNewList( self.display_list, GL_COMPILE )
         # load texture map
         glBindTexture( GL_TEXTURE_2D, self.texture_id )
-
-        # Multiply by rotation matrix
-        for vertex in enumerate(self.vertices):
-            # Rotate pi/2 about Z
-            # x = vertex[1][0]*cos(phi) - vertex[1][1]*sin(phi)
-            # y = vertex[1][0]*sin(phi) + vertex[1][1]*cos(phi)
-            # Rotate pi/2 about Y
-            # x = vertex[1][0]*cos(phi) + vertex[1][2]*sin(phi)
-            # z = vertex[1][2]*cos(phi) - vertex[1][0]*sin(phi)
-            # Rotate pi/2 about X
-            y = vertex[1][1]*cos(pi/2) - vertex[1][2]*sin(pi/2)
-            z = vertex[1][1]*sin(pi/2) + vertex[1][2]*cos(pi/2)
-            vertex[1][1] = y
-            vertex[1][2] = z
                 
         # generate opengl calls for each face of the mesh
         for i, face in enumerate( self.faces ):
@@ -188,14 +174,13 @@ class Textured_Mesh:
         glPushMatrix()
 
         # if display list has not been generated generate it
-        """
-        if self.display_list is None:
-            self._generate_display_list()
-        """
+        # or when press button again to flip the part with 90 degree
         if self.display_list is None or flip != self.flip:
             self._generate_display_list()
             self.flip = flip
 
+        # print self.name, ": flip->", self.flip
+        glRotatef( 90*self.flip , 0 , 1 , 0 ) 
         # if mesh is selected use selected diffuse color
         if selected:
             glMaterialfv( GL_FRONT, GL_DIFFUSE, self.diffuse_selected )
