@@ -1,4 +1,5 @@
 from OpenGL.GL import *
+from OpenGL.GLUT import *
 import Image
 import gtk
 from math import *
@@ -157,13 +158,12 @@ class Textured_Mesh:
             else:
                 raise ValueError( "Can't generate textured mesh: "
                                   + "face must have 3 or 4 vertices!" )
-
+            
             for j in range( len(face) ):          
                 glTexCoord2f( *face_uv_coords[j] )
                 glVertex3f( *face_vertices[j] )
                                
             glEnd()
-            
         glEndList()
 
     def draw( self, selected=False, flip=0 ):
@@ -172,7 +172,6 @@ class Textured_Mesh:
         glEnable(GL_TEXTURE_2D)
         # preserve existing opengl settings
         glPushMatrix()
-
         # if display list has not been generated generate it
         # or when press button again to flip the part with 90 degree
         if self.display_list is None or flip != self.flip:
@@ -186,7 +185,7 @@ class Textured_Mesh:
             glMaterialfv( GL_FRONT, GL_DIFFUSE, self.diffuse_selected )
         else:
             glMaterialfv( GL_FRONT, GL_DIFFUSE, self.diffuse )
-
+ 
         # call display list to draw mesh to screen
         glCallList( self.display_list )
 
