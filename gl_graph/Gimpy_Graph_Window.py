@@ -38,10 +38,10 @@ class Gimpy_Graph_Window( gtk.Window ):
         # connect destroy event
         self.connect( "destroy", self._on_quit )
 
-        # add gtk opengl draw area widget to window
+        # add gtk opengl draw area widget to window      
         self.camera = Gimpy_Camera()        
         self.add( self.camera )
-
+        
         # connect camera handlers to local methods
         self.camera.handle_draw = self.handle_draw
         self.camera.handle_press = self.handle_press

@@ -2,7 +2,7 @@ import gtk
 import gtk.gtkgl
 from OpenGL.GL import *
 from OpenGL.GLU import *
-from OpenGL.GLUT import glutSolidTeapot
+from OpenGL.GLUT import *
 
 class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
     """gimp toolkit opengl drawing area widget with hooks for event callbacks
@@ -101,9 +101,10 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
     def handle_init_gl( self ):
         """set up opengl lighting and such
         """
-        light_ambient = (0.7, 0.7, 0.7, 1.0)
+        """
+        light_ambient = (0.2, 0.2, 0.2, 1.0)
         light_diffuse = (1.0, 1.0, 1.0, 1.0)
-        light_position = (10.0, 10.0, 10.0, 0.0)
+        light_position = (0.0, 300.0, 300.0, 0.0)
 
         glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient)
         glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse)
@@ -111,7 +112,46 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
         
         glEnable(GL_LIGHTING)
         glEnable(GL_LIGHT0)
+        """
+        white2 = (0.2, 0.2, 0.2, 1.0)
+        white6 = (0.6, 0.6, 0.6, 1.0)
+        white = (1.0, 1.0, 1.0, 1.0)
+        black = (0.0, 0.0, 0.0, 1.0)
+
+        mat_shininess = (50.0)
+
+        light0_position = (6000.0, 4000.0, 5000.0, 0.0)
+        light1_position = (-6000.0, -4000.0, 5000.0, 0.0)
+        light2_position = (6000.0, 4000.0, -5000.0, 0.0)
+        light3_position = (-6000.0, -4000.0, -5000.0, 0.0)
         
+        glLightfv(GL_LIGHT0, GL_POSITION, light0_position)
+        glLightfv(GL_LIGHT0, GL_AMBIENT, black)
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, white)
+        glLightfv(GL_LIGHT0, GL_SPECULAR, white)
+        glEnable(GL_LIGHT0)
+
+        glLightfv(GL_LIGHT1, GL_POSITION, light1_position)
+        glLightfv(GL_LIGHT1, GL_AMBIENT, black)
+        glLightfv(GL_LIGHT1, GL_DIFFUSE, white)
+        glLightfv(GL_LIGHT1, GL_SPECULAR, white)
+        glEnable(GL_LIGHT1)
+
+        glLightfv(GL_LIGHT2, GL_POSITION, light2_position)
+        glLightfv(GL_LIGHT2, GL_AMBIENT, black)
+        glLightfv(GL_LIGHT2, GL_DIFFUSE, white)
+        glLightfv(GL_LIGHT2, GL_SPECULAR, white)
+        glEnable(GL_LIGHT2)
+
+        glLightfv(GL_LIGHT3, GL_POSITION, light3_position)
+        glLightfv(GL_LIGHT3, GL_AMBIENT, black)
+        glLightfv(GL_LIGHT3, GL_DIFFUSE, white)
+        glLightfv(GL_LIGHT3, GL_SPECULAR, white)
+        glEnable(GL_LIGHT3)
+        glEnable(GL_LIGHTING)
+
+        glEnable(GL_NORMALIZE)
+        # glEnable(GL_COLOR_MATERIAL)
         glEnable(GL_DEPTH_TEST)
         glShadeModel(GL_SMOOTH)
         glEnable(GL_AUTO_NORMAL)
@@ -119,8 +159,6 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
         glClearColor(1.0, 1.0, 1.0, 1.0)
         glClearDepth(1.0)
 
-        # set up texturing
-        # glEnable(GL_TEXTURE_2D)
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
