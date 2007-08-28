@@ -35,8 +35,8 @@ class Socket:
                 "connect to ball %s forcing socket to disconnect from ball %s!"
                 % (str(self.ball), str(ball)) )
         if ball.socket is not None:
-            self.LOG.error( "connect to socket %s forcing socket to "
-                            + "disconnect from socket %s!"
+            self.LOG.error(
+                "connect to socket %s forcing disconnect from socket %s!"
                 % (str(self), str(ball.socket))  )
         self.ball = ball
         ball.socket = self

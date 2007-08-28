@@ -15,6 +15,7 @@ queue = Queue()
 # create some hubs
 queue.put( {"type":"create", "hub":(42, 3)} )
 queue.put( {"type":"create", "hub":(88, 1)} )
+queue.put( {"type":"create", "hub":(17, 4)} )
 
 # connect them
 queue.put( {"type":"connect",
@@ -24,6 +25,12 @@ queue.put( {"type":"connect",
             "hub":(88, 1), "socket":1,
             "strut":(3, 17), "ball":1} )
 
+queue.put( {"type":"connect",
+            "hub":(17, 4), "socket":1,
+            "strut":(3, 18), "ball":0} )
+queue.put( {"type":"connect",
+            "hub":(88, 1), "socket":2,
+            "strut":(3, 18), "ball":1} )
 
 # change the socket angles
 queue.put( {"type":"configure",
@@ -35,6 +42,11 @@ queue.put( {"type":"configure",
             "hub":(88, 1), "socket":1,
             "roll":(90.0, 90.0),
             "pitch":(60.0, 60.0),
+            "yaw":(0.0, 0.0)} )
+queue.put( {"type":"configure",
+            "hub":(17, 4), "socket":1,
+            "roll":(200.0, 200.0),
+            "pitch":(10.0, 10.0),
             "yaw":(0.0, 0.0)} )
 
 # load part library
