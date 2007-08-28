@@ -42,6 +42,7 @@ class Part_Library( sax.handler.ContentHandler ):
             children = int( str(attrs["children"]) )
             part_type = str( attrs["part_type"] )
             rootness = float( str(attrs["rootness"]) )
+            label = str(attrs["label"])
             
             # generate part and add it to dictionary by address
             part_class = None
@@ -55,7 +56,8 @@ class Part_Library( sax.handler.ContentHandler ):
             part = part_class( address=address,
                                children=children,
                                part_type=part_type,
-                               rootness=rootness )
+                               rootness=rootness,
+                               label = label)
             self.parts[address] = part
             
         else:

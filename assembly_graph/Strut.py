@@ -4,9 +4,10 @@ class Strut:
     """represents strut in assembly graph
     """
     
-    def __init__( self, address, children, part_type, rootness ):
+    def __init__( self, address, children, part_type, rootness, label ):
         self.address = address
         self.rootness = rootness
+        self.label = label
         self.type = part_type
         self.subgraph = None
 

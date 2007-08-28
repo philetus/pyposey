@@ -55,7 +55,7 @@ class Assembly_Graph( Thread ):
 
             # call observer functions
             for observer in self.observers:
-                observer()
+                observer(event)
 
     def _create( self, event ):
         """create new hub node and add it to node set
@@ -73,6 +73,7 @@ class Assembly_Graph( Thread ):
 
         # add subgraph to subgraphs list
         self.subgraphs.append( subgraph )
+
 
     def _destroy( self, event ):
         """remove hub node
