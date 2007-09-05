@@ -42,7 +42,9 @@ class Part_Library( sax.handler.ContentHandler ):
             children = int( str(attrs["children"]) )
             part_type = str( attrs["part_type"] )
             rootness = float( str(attrs["rootness"]) )
-            label = str(attrs["label"])
+            label = "x"
+            if attrs.has_key( "label" ):
+                label = str(attrs["label"])
             
             # generate part and add it to dictionary by address
             part_class = None

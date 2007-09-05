@@ -6,9 +6,9 @@ class Mesh_Hub( Hub, Mesh_Node ):
     """
     """
 
-    def __init__( self, address, children, part_type, rootness ):
+    def __init__( self, address, children, part_type, rootness, label="x" ):
         """
         """
-        Hub.__init__( self, address, children, part_type, rootness )
+        Hub.__init__( self, address, children, part_type, rootness, label )
         self.connectors = self.sockets # alias sockets for mesh node
         Mesh_Node.__init__( self, address )
