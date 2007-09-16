@@ -47,7 +47,7 @@ class Gimpy_Graph_Window( gtk.Window ):
         self.camera.handle_press = self.handle_press
 
         # add redraw call to assembly graph observer methods
-        self.assembly_graph.observers.append( self.redraw )
+        self.assembly_graph.observers.append( self._on_graph_event )
 
         # variable to hold currently selected graph node
         self.selected = None
@@ -93,4 +93,7 @@ class Gimpy_Graph_Window( gtk.Window ):
     def _on_quit( self, widget ):
         self.handle_quit()
         gtk.main_quit()
+
+    def _on_graph_event( self, event ):
+        self.redraw()
         
