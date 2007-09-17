@@ -1,6 +1,7 @@
 import re
 from threading import Thread
 from serial import Serial
+from serial import SerialException
 
 from pyposey.util.Log import Log
 
@@ -32,7 +33,7 @@ class Sensor_Demon( Thread ):
     SENSORS = 4 # sensors per socket
     EMITTERS = 11 # emitters per ball
 
-    def __init__( self, sensor_queue=None, serial_port="COM5" ):
+    def __init__( self, sensor_queue=None, serial_port="/dev/ttyUSB0" ):
         """takes sensor queue to write to and xml stream to read from
         """
         Thread.__init__( self )
@@ -41,7 +42,13 @@ class Sensor_Demon( Thread ):
         self.setDaemon( True )
 
         self.sensor_queue = sensor_queue
-        self.serial = Serial( port=serial_port, timeout=0.1 )
+
+        try:
+          self.serial = Serial( port=serial_port, timeout=0.1 )
+        except SerialException:
+          print "ERROR: Unable to find USB base station; exiting."
+          from sys import exit
+          exit(-1)
 
 
     def run( self ):
