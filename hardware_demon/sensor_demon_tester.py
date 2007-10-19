@@ -10,7 +10,7 @@ from Sensor_Demon import Sensor_Demon
 queue = Queue()
 
 # create sensor demon
-sensor_demon = Sensor_Demon( sensor_queue=queue )
+sensor_demon = Sensor_Demon( sensor_queue=queue, serial_port="/dev/ttyUSB0" )
 sensor_demon.start()
 
 # read and print events from queue

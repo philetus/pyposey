@@ -73,7 +73,7 @@ class Mesh_Library( sax.handler.ContentHandler ):
         parent_angles = self._parse_float_lists( str(attrs["parent_angles"]) )
         parent_offsets = self._parse_floats( str(attrs["parent_offsets"]) )
 
-        scale = self._parse_scale( attrs )
+        scale = self._parse_option( attrs, "scale" )
 
         # try to open data files and create stl mesh object,
         # if mesh fails to load just print error message
@@ -115,7 +115,9 @@ class Mesh_Library( sax.handler.ContentHandler ):
         parent_angles = self._parse_float_lists( str(attrs["parent_angles"]) )
         parent_offsets = self._parse_floats( str(attrs["parent_offsets"]) )
 
-        scale = self._parse_scale( attrs )
+        translate = self._parse_option( attrs, "translate" )
+        rotate = self._parse_option( attrs, "rotate" )
+        scale = self._parse_option( attrs, "scale" )
 
         # try to open data files and create textured mesh object,
         # if mesh fails to load just print error message
@@ -133,6 +135,8 @@ class Mesh_Library( sax.handler.ContentHandler ):
                                   thumbnail_file=thumbnail_file,
                                   parent_angles=parent_angles,
                                   parent_offsets=parent_offsets,
+                                  translate=translate,
+                                  rotate=rotate,
                                   scale=scale )
 
             # close files
@@ -148,12 +152,12 @@ class Mesh_Library( sax.handler.ContentHandler ):
         except Exception, error:
             print "failed to parse mesh named '%s': %s" % ( name, str(error) )
 
-    def _parse_scale( self, attrs ):
-        scale = ( 1.0, 1.0, 1.0 )
-        if attrs.has_key( "scale" ):
-            scale = self._parse_floats( str(attrs["scale"]) )
+    def _parse_option( self, attrs, name ):
+        option = ( 1.0, 1.0, 1.0 )
+        if attrs.has_key( name ):
+            option = self._parse_floats( str(attrs[name]) )
             
-        return scale
+        return option
 
 
     def _parse_float_lists( self, string ):
