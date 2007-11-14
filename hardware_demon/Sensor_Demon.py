@@ -1,6 +1,6 @@
 import re
 from threading import Thread
-from serial import Serial
+from pyxbee.Xbee import Xbee
 from serial import SerialException
 
 from pyposey.util.Log import Log
@@ -22,7 +22,7 @@ class Sensor_Demon( Thread ):
        }
            
     """
-    LOG = Log( name='pyflexy.hardware_demon.Sensor_Demon', level=Log.WARN )
+    LOG = Log( name='pyflexy.hardware_demon.Sensor_Demon', level=Log.INFO )
     
     TAG_PATTERN = re.compile(
         r'<connect_event\s+hub_address="([^"<>]+)"\s+'
@@ -44,28 +44,41 @@ class Sensor_Demon( Thread ):
         self.sensor_queue = sensor_queue
 
         try:
-          self.serial = Serial( port=serial_port, timeout=0.1 )
+          self.xbee = Xbee( port=serial_port, timeout=0.1 )
         except SerialException:
           print "ERROR: Unable to find USB base station; exiting."
           from sys import exit
-          exit(-1)
+          exit( -1 )
 
 
     def run( self ):
         """read text into buffer and parse it with regular expression
         """
-        xml_buffer = ""
+        self.xbee.start()
+        xml_buffer = {}
         
-        while self.serial.isOpen():
+        while self.xbee.is_open():
             self.LOG.debug( "reading" )
-            xml_buffer += self.serial.read( size=100 )
-            xml_buffer = self.RN_PATTERN.sub( '', xml_buffer ) # remove \r, \n
-            self.LOG.debug( "read: '%s'" % xml_buffer )
+
+            # block waiting for packet
+            packet = self.xbee.read( timeout=None )
+            address = tuple( packet.address )
+
+            # create input stream for hub
+            if not address in xml_buffer:
+                xml_buffer[address] = ""
+
+            # get data as string and append it to input stream
+            string = "".join( chr(i) for i in packet.data )
+            string = string.replace( "\r", "" ).replace( "\n", "" ) # no \r, \n
+            xml_buffer[address] += string
+            
+            self.LOG.debug( "read: '%s'" % xml_buffer[address] )
 
             try:
                 
                 # if xml buffer has full tag parse it into couple event
-                match = self.TAG_PATTERN.search( xml_buffer )
+                match = self.TAG_PATTERN.search( xml_buffer[address] )
                 if match is not None:
                     
                     # create new couple event dict
@@ -97,15 +110,17 @@ class Sensor_Demon( Thread ):
 
                     # move to end of match
                     if match.start() > 0:
-                        self.LOG.warn( "unrecognized serial input: '%s'"
-                                       % xml_buffer[:match.start()] )
-                    xml_buffer = xml_buffer[match.end():]
+                        self.LOG.warn(
+                            "unrecognized serial input: '%s'"
+                            % xml_buffer[address][:match.start()] )
+                    xml_buffer[address] = xml_buffer[address][match.end():]
 
             # recover from mangled tag
             except ValueError:
-                self.LOG.warn( "malformed tag: '%s'"
-                               % xml_buffer[match.start():match.end()] )
-                xml_buffer = xml_buffer[match.end():]
+                self.LOG.warn(
+                    "malformed tag: '%s'"
+                    % xml_buffer[address][match.start():match.end()] )
+                xml_buffer[address] = xml_buffer[address][match.end():]
                 
         self.LOG.warn( "serial port closed!" )
 

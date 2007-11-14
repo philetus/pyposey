@@ -9,7 +9,7 @@ from pyposey.util.Log import Log
 class GL_Graph_Visitor:
     """renders assembly graph with opengl
     """
-    LOG = Log( name='puppet_show.GL_Graph_Renderer', level=Log.INFO )
+    LOG = Log( name='pyposey.gl_graph.GL_Graph_Visitor', level=Log.INFO )
 
     ROOT_OFFSET = (200., 0., 0.)
     ROTATION_AXIS = (0., 0., 1.)
@@ -45,7 +45,7 @@ class GL_Graph_Visitor:
                 try:
                     self._visit_hub( hub )
                 except Exception, error:
-                    self.LOG.error( error )
+                    self.LOG.error( "visit hub failed: " + str(error) )
 
                 # clear visited set
                 self.visited = None
@@ -81,7 +81,7 @@ class GL_Graph_Visitor:
                 # move to socket
                 glRotatef( socket.parent_angle[2], *self.ROTATION_AXIS )
                 glTranslatef( socket.parent_offset, 0., 0. )
-
+                
                 # rotate into strut
                 self._rotate_in( *socket.angle )
 
@@ -112,7 +112,7 @@ class GL_Graph_Visitor:
         for ball in strut.balls:
             socket = ball.socket
             if (socket is not None) and (socket.hub not in self.visited):
-
+                    
                 # remember this spot
                 glPushMatrix()
 
@@ -135,7 +135,7 @@ class GL_Graph_Visitor:
                 # come back
                 glPopMatrix()
 
-    def _rotate_in( self, r, p, y ):
+    def _rotate_in( self, r, p, y ):            
         angle = None
         axis = None
         
@@ -144,18 +144,23 @@ class GL_Graph_Visitor:
             axis = (1.0, 0.0, 0.0)
 
         else:
-            old = Vector3( 1.0, 0.0, 0.0 )
-            new = old.transform( yaw(-y) * pitch(-p) )
+            try:
+                old = Vector3( 1.0, 0.0, 0.0 )
+                new = old.transform( yaw(-y) * pitch(-p) )
 
-            angle = old.angle_to( new )
-            axis_vector = old.cross( new ).normalize()
-            axis = tuple( axis_vector )
+                angle = old.angle_to( new )
+                axis_vector = old.cross( new ).normalize()
+                axis = tuple( axis_vector )
+
+            except Exception, error:
+                self.LOG.error( "rotate in failed: " + str(error) )
 
         self.LOG.debug( "rpy (%f, %f, %f) to angle %f axis %s"
                         % (r, p, y, angle, str(axis)) )
                 
         glRotatef( angle, *axis )
         glRotatef( -r, 1.0, 0.0, 0.0 )
+        
 
         
     def _rotate_out( self, r, p, y ):
