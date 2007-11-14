@@ -15,14 +15,15 @@ class Textured_Mesh:
 
     def __init__( self, name, part_type, geometry_file, texture_file,
                   thumbnail_file, parent_angles, parent_offsets,
-                  scale=(1.0, 1.0, 1.0) ):
+                  scale=(1.0, 1.0, 1.0), flips=1, flip_axis=(0., 0., 1.) ):
         
         self.name = name
         self.part_type = part_type
         self.parent_angles = parent_angles
         self.parent_offsets = parent_offsets
         self.scale = scale
-        self.flip = 0
+        self.flips = flips
+        self.flip_axis = flip_axis
         
         self.centroid = None
 
@@ -166,20 +167,18 @@ class Textured_Mesh:
             glEnd()
         glEndList()
 
-    def draw( self, selected=False, flip=0 ):
+    def draw( self, selected=False ):
         """draw textured mesh to opengl by calling display list
         """        
         glEnable(GL_TEXTURE_2D)
+        
         # preserve existing opengl settings
         glPushMatrix()
+        
         # if display list has not been generated generate it
-        # or when press button again to flip the part with 90 degree
-        if self.display_list is None or flip != self.flip:
+        if self.display_list is None:
             self._generate_display_list()
-            self.flip = flip
 
-        # print self.name, ": flip->", self.flip
-        glRotatef( 90*self.flip , 0 , 1 , 0 ) 
         # if mesh is selected use selected diffuse color
         if selected:
             glMaterialfv( GL_FRONT, GL_DIFFUSE, self.diffuse_selected )
@@ -192,6 +191,5 @@ class Textured_Mesh:
         # restore opengl settings
         glPopMatrix()
         glDisable(GL_TEXTURE_2D)
-        # self.flip = (self.flip+1)%4
 
         

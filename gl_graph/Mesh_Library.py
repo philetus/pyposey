@@ -63,98 +63,106 @@ class Mesh_Library( sax.handler.ContentHandler ):
         """make new textured mesh using values in attributes dictionary
         """
         # get attributes
-        name = str( attrs["name"] )
-        part_type = str( attrs["part_type"] )
+        args = {}
+        args["name"] = str( attrs["name"] )
+        args["part_type"] = str( attrs["part_type"] )
         stl_filename = str( attrs["stl_file"] )
         thumbnail_filename = str( attrs["thumbnail_file"] )
-        specular = self._parse_floats( str(attrs["specular"]) )
-        shininess = float( str(attrs["shininess"]) )
-        diffuse = self._parse_floats( str(attrs["diffuse"]) )
-        parent_angles = self._parse_float_lists( str(attrs["parent_angles"]) )
-        parent_offsets = self._parse_floats( str(attrs["parent_offsets"]) )
+        args["specular"] = self._parse_floats( str(attrs["specular"]) )
+        args["shininess"] = float( str(attrs["shininess"]) )
+        args["diffuse"] = self._parse_floats( str(attrs["diffuse"]) )
+        args["parent_angles"] = self._parse_float_lists(
+            str(attrs["parent_angles"]) )
+        args["parent_offsets"] = self._parse_floats(
+            str(attrs["parent_offsets"]) )
 
-        scale = self._parse_scale( attrs )
+        scale = self._parse_option( attrs, "scale" )
+        if scale is not None:
+            args["scale"] = scale
+        if attrs.has_key( "flips" ):
+            args["flips"] = float( attrs["flips"] )
+        flip_axis = self._parse_option( attrs, "flip_axis" )
+        if flip_axis is not None:
+            args["flip_axis"] = flip_axis
 
         # try to open data files and create stl mesh object,
         # if mesh fails to load just print error message
         try:
 
-            stl_file = open( path.join(self.folder, stl_filename), "rb" )
-            thumbnail_file = open(
+            args["stl_file"] = open(
+                path.join(self.folder, stl_filename), "rb" )
+            args["thumbnail_file"] = open(
                 path.join(self.folder, thumbnail_filename), "rb" )
 
-            mesh = STL_Mesh( name=name,
-                             part_type=part_type,
-                             stl_file=stl_file,
-                             thumbnail_file=thumbnail_file,
-                             specular=specular,
-                             shininess=shininess,
-                             diffuse=diffuse,
-                             parent_angles=parent_angles,
-                             parent_offsets=parent_offsets,
-                             scale=scale )
+            mesh = STL_Mesh( **args )
             
-            thumbnail_file.close()
-            stl_file.close()
+            args["thumbnail_file"].close()
+            args["stl_file"].close()
 
             # add mesh to library using name as key
-            if name in self.meshes:
-                raise KeyError( "multiple meshes with name '%s'!" % name )
-            self.meshes[name] = mesh
+            if args["name"] in self.meshes:
+                raise KeyError( "multiple meshes with name '%s'!"
+                                % args["name"] )
+            self.meshes[args["name"]] = mesh
        
         except Exception, error:
-            print "failed to parse mesh named '%s': %s" % ( name, str(error) )
+            print "failed to parse mesh named '%s': %s" % (
+                attrs["name"], str(error) )
 
     def _build_textured_mesh( self, attrs ):
+        args = {}
         # get attributes
-        name = str( attrs["name"] )
-        part_type = str( attrs["part_type"] )
+        args["name"] = str( attrs["name"] )
+        args["part_type"] = str( attrs["part_type"] )
         geometry_filename = str( attrs["geometry_file"] )
         texture_filename = str( attrs["texture_file"] )
         thumbnail_filename = str( attrs["thumbnail_file"] )
-        parent_angles = self._parse_float_lists( str(attrs["parent_angles"]) )
-        parent_offsets = self._parse_floats( str(attrs["parent_offsets"]) )
+        args["parent_angles"] = self._parse_float_lists(
+            str(attrs["parent_angles"]) )
+        args["parent_offsets"] = self._parse_floats(
+            str(attrs["parent_offsets"]) )
 
-        scale = self._parse_scale( attrs )
+        scale = self._parse_option( attrs, "scale" )
+        if scale is not None:
+            args["scale"] = scale
+        flips = None
+        if attrs.has_key( "flips" ):
+            args["flips"] = float( attrs["flips"] )
+        flip_axis = self._parse_option( attrs, "flip_axis" )
+        if flip_axis is not None:
+            args["flip_axis"] = flip_axis
 
         # try to open data files and create textured mesh object,
         # if mesh fails to load just print error message
         try:
-            geometry_file = open(
+            args["geometry_file"] = open(
                 path.join(self.folder, geometry_filename), "r" )
-            texture_file = open(
+            args["texture_file"] = open(
                 path.join(self.folder, texture_filename), "rb" )
-            thumbnail_file = open(
+            args["thumbnail_file"] = open(
                 path.join(self.folder, thumbnail_filename), "rb" )
-            mesh = Textured_Mesh( name=name,
-                                  part_type=part_type,
-                                  geometry_file=geometry_file,
-                                  texture_file=texture_file,
-                                  thumbnail_file=thumbnail_file,
-                                  parent_angles=parent_angles,
-                                  parent_offsets=parent_offsets,
-                                  scale=scale )
+            
+            mesh = Textured_Mesh( **args )
 
             # close files
-            geometry_file.close()
-            texture_file.close()
-            thumbnail_file.close()
+            args["geometry_file"].close()
+            args["texture_file"].close()
+            args["thumbnail_file"].close()
 
             # add mesh to library using name as key
-            if name in self.meshes:
-                raise KeyError( "multiple meshes with name '%s'!" % name )
-            self.meshes[name] = mesh
+            if args["name"] in self.meshes:
+                raise KeyError( "multiple meshes with name '%s'!"
+                                % args["name"] )
+            self.meshes[args["name"]] = mesh
 
         except Exception, error:
-            print "failed to parse mesh named '%s': %s" % ( name, str(error) )
+            print "failed to parse mesh named '%s': %s" % (
+                attrs["name"], str(error) )
 
-    def _parse_scale( self, attrs ):
-        scale = ( 1.0, 1.0, 1.0 )
-        if attrs.has_key( "scale" ):
-            scale = self._parse_floats( str(attrs["scale"]) )
-            
-        return scale
-
+    def _parse_option( self, attrs, name ):
+        if attrs.has_key( name ):
+            return self._parse_floats( str(attrs[name]) )
+        return None
 
     def _parse_float_lists( self, string ):
         raw_list = self.LIST_PATTERN.split( string[1:-1] )

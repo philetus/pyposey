@@ -1,4 +1,4 @@
-from OpenGL.GL import glPushName, glPopName
+from OpenGL.GL import glPushName, glPopName, glRotate, glPushMatrix, glPopMatrix
 
 class Mesh_Node( object ):
     """mixin to render hubs and struts with meshes in opengl
@@ -10,7 +10,7 @@ class Mesh_Node( object ):
         self.gl_name = (int(self.address[0]) * 256) + int(self.address[1])
         self.mesh = None
         self.selected = False
-        self.flip = -1
+        self.flip_count = 0
 
     def set_mesh( self, mesh ):
         """
@@ -21,10 +21,20 @@ class Mesh_Node( object ):
             connector.parent_offset = mesh.parent_offsets[i]
 
     def draw( self ):
+        # push name for selection rendering pass
         glPushName( self.gl_name )
-        self.mesh.draw( selected=self.selected, flip=self.flip )
+        glPushMatrix()
+
+        # flip mesh
+        flip_angle = (360 / self.mesh.flips) * self.flip_count
+        glRotate( flip_angle, *self.mesh.flip_axis )
+
+        # call mesh to draw itself
+        self.mesh.draw( selected=self.selected )
+
+        glPopMatrix()
         glPopName()
 
-    def inc_flip(self):
-        self.flip = (self.flip+1) % 4
+    def flip(self):
+        self.flip_count = (self.flip_count + 1) % self.mesh.flips
         

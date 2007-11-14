@@ -13,7 +13,7 @@ class STL_Mesh( object ):
 
     def __init__( self, name, part_type, stl_file, thumbnail_file,
                   specular, shininess, diffuse, parent_angles, parent_offsets,
-                  scale=(1.0, 1.0, 1.0) ):
+                  scale=(1.0, 1.0, 1.0), flips=1, flip_axis=(0., 0., 1.) ):
         self.name = name
         self.part_type = part_type
         
@@ -29,12 +29,16 @@ class STL_Mesh( object ):
         self.parent_angles = parent_angles
         self.parent_offsets = parent_offsets
 
+        self.flips = flips
+        self.flip_axis = flip_axis
+
         # parse triangles from stl file
         self._parse_stl( stl_file, scale )
 
         # load thumbnail from thumbnail file
         self.thumbnail = None
         self._load_thumbnail( thumbnail_file )
+
         
     def _make_list( self ):
         """generate opengl display list to draw triangles in mesh
@@ -61,7 +65,7 @@ class STL_Mesh( object ):
         glEnd()
         glEndList()
 
-    def draw( self, selected=False, flip=0 ):
+    def draw( self, selected=False ):
         """draw stl mesh by executing opengl display list
         """
         # preserve opengl settings
