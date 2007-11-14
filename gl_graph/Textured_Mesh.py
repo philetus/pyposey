@@ -4,10 +4,6 @@ import Image
 import gtk
 from math import *
 
-from l33tC4D.vector.Vector3 import Vector3
-from l33tC4D.vector.matrices import( roll_pitch_yaw, scale_matrix,
-                                     translate_matrix )
-
 class Textured_Mesh:
     """texture mapped model rendered in opengl
 
@@ -19,18 +15,13 @@ class Textured_Mesh:
 
     def __init__( self, name, part_type, geometry_file, texture_file,
                   thumbnail_file, parent_angles, parent_offsets,
-                  translate=(1.0, 1.0, 1.0),
-                  rotate=(1.0, 1.0, 1.0),
                   scale=(1.0, 1.0, 1.0) ):
         
         self.name = name
         self.part_type = part_type
         self.parent_angles = parent_angles
         self.parent_offsets = parent_offsets
-        self.translate = translate_matrix( *translate )
-        self.rotate = roll_pitch_yaw( *rotate )
-        self.scale = scale_matrix( *scale )
-        self.transform = self.scale * self.rotate * self.translate
+        self.scale = scale
         self.flip = 0
         
         self.centroid = None
@@ -84,12 +75,10 @@ class Textured_Mesh:
                 self._parse_uv_coord( line )
         
     def _parse_vertex( self, line ):
-        coords = [ float(c) for c in line[1:]]
-        # transform vertex by config transformation
-        vertex = Vector3( *coords ).transform( self.transform )
-
-        # append transformed vertex coords as a list
-        self.vertices.append( list(vertex) )
+        vertex = []
+        for coord, scale in zip( line[1:], self.scale ):
+            vertex.append( float(coord) * scale )
+        self.vertices.append( vertex )
 
         # update bounds to include this vertex's coords
         for i, coord in enumerate( vertex ):
