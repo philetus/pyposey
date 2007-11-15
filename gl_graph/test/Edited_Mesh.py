@@ -17,23 +17,21 @@ class Edited_Mesh:
 
     MAX_BOUND = 1000.0
 
-    def __init__( self, name, part_type, geometry_file, texture_file,
-                  thumbnail_file, parent_angles, parent_offsets,
-                  translate=(1.0, 1.0, 1.0),
-                  rotate=(1.0, 1.0, 1.0),
+    def __init__( self,
+                  geometry_file,
+                  texture_file,
+                  translate=(0.0, 0.0, 0.0),
+                  rotate=(0.0, 0.0, 0.0),
                   scale=(1.0, 1.0, 1.0) ):
         
-        self.name = name
-        self.part_type = part_type
-        self.parent_angles = parent_angles
-        self.parent_offsets = parent_offsets
         self.translate = translate_matrix( *translate )
         self.rotate = roll_pitch_yaw( *rotate )
         self.scale = scale_matrix( *scale )
         self.transform = self.scale * self.rotate * self.translate
-        self.flip = 0
         
         self.centroid = None
+
+        self.name ="edited mesh"
 
         # seed bounds with max value
         self.bounds = [ [self.MAX_BOUND] * 3, [-self.MAX_BOUND] * 3 ]
@@ -48,10 +46,6 @@ class Edited_Mesh:
         self.texture_size = None
         self.texture = None
         self._load_texture_image( texture_file )
-        
-        # load thumbnail from thumbnail file
-        self.thumbnail = None
-        self._load_thumbnail( thumbnail_file )
         
         # opengl texture id and display list for textured mesh
         self.texture_id = None
@@ -84,10 +78,17 @@ class Edited_Mesh:
                 self._parse_uv_coord( line )
         
     def _parse_vertex( self, line ):
+        #print "vertex line:", line
+        
         coords = [ float(c) for c in line[1:]]
+
+        #print "coords:", coords
+        
         # transform vertex by config transformation
         vertex = Vector3( *coords ).transform( self.transform )
 
+        #print "vertex:", vertex, "\n"
+        
         # append transformed vertex coords as a list
         self.vertices.append( list(vertex) )
 
@@ -99,17 +100,12 @@ class Edited_Mesh:
                 self.bounds[1][i] = coord
             
     def _parse_face( self, line ):
-        face = []
-        for i in range( len(line) - 1 ):
-            face.append( int(line[i + 1]) )
+        face = [ int(v) for v in line[1:] ]
         self.faces.append( face )
 
     def _parse_uv_coord( self, line ):
-        uv_coord = []
-        for i in range( len(line) - 1 ):
-            if( i % 2 == 0 ):
-                pair = [float(line[i + 1]), float(line[i + 2])]
-                uv_coord.append( pair )
+        uv_coord = [ [float(c) for c in line[i:i+2]]
+                      for i in range(1, len(line), 2) ]
         self.uv_coords.append( uv_coord )
 
     def _load_texture_image( self, texture_file ):
@@ -130,17 +126,6 @@ class Edited_Mesh:
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR )
         glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
                       GL_UNSIGNED_BYTE, self.texture )
-
-    def _load_thumbnail( self, thumbnail_file ):
-        """load given thumbnail as gtk image
-        """
-        # silly hack to load gtk image from file object
-        loader = gtk.gdk.PixbufLoader()
-        loader.write( thumbnail_file.read() )
-        loader.close()
-
-        self.thumbnail = gtk.Image()
-        self.thumbnail.set_from_pixbuf( loader.get_pixbuf() )
 
     def _generate_display_list( self ):
         """generate opengl display list from geometry and texture files
@@ -180,22 +165,19 @@ class Edited_Mesh:
     def draw( self, selected=False, flip=0 ):
         """draw textured mesh to opengl by calling display list
         """
-        print "drawing mesh %s ..." % self.name,
+        #print "drawing mesh %s ..." % self.name,
 
         try:
         
             glEnable(GL_TEXTURE_2D)
             # preserve existing opengl settings
 
-            print "1", 
             glPushMatrix()
             # if display list has not been generated generate it
             # or when press button again to flip the part with 90 degree
             if self.display_list is None or flip != self.flip:
                 self._generate_display_list()
                 self.flip = flip
-
-            print "2",
 
             # print self.name, ": flip->", self.flip
             glRotatef( 90*self.flip , 0 , 1 , 0 ) 
@@ -205,13 +187,9 @@ class Edited_Mesh:
             else:
                 glMaterialfv( GL_FRONT, GL_DIFFUSE, self.diffuse )
 
-            print "3",
-            
             # call display list to draw mesh to screen
             glCallList( self.display_list )
 
-            print "4",
-            
             # restore opengl settings
             glPopMatrix()
             glDisable(GL_TEXTURE_2D)
@@ -220,6 +198,27 @@ class Edited_Mesh:
         except Exception, error:
             print "error: %s", str( error ),
 
-        print "finished drawing"
+        #print "finished drawing"
 
-        
+    def write( self, out ):
+        """
+        """
+        # write vertices to file
+        for v in self.vertices:
+            out.write( "v %.5f %.5f %.5f\n" % tuple(v) )
+
+        # write out faces and uv coords
+        for face, uv_coords in zip( self.faces, self.uv_coords ):
+
+            # write out vertices for face
+            out.write( "f" )
+            for v in face:
+                out.write( " %d" % v )
+            out.write( "\n" )
+
+            # write out uv coords for face
+            out.write( "uv" )
+            for pair in uv_coords:
+                for c in pair:
+                    out.write( " %.5f" % c )
+            out.write( "\n" )
