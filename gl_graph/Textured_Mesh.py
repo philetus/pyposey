@@ -15,13 +15,12 @@ class Textured_Mesh:
 
     def __init__( self, name, part_type, geometry_file, texture_file,
                   thumbnail_file, parent_angles, parent_offsets,
-                  scale=(1.0, 1.0, 1.0), flips=1, flip_axis=(0., 0., 1.) ):
+                  flips=1, flip_axis=(0., 0., 1.) ):
         
         self.name = name
         self.part_type = part_type
         self.parent_angles = parent_angles
         self.parent_offsets = parent_offsets
-        self.scale = scale
         self.flips = flips
         self.flip_axis = flip_axis
         
@@ -76,9 +75,7 @@ class Textured_Mesh:
                 self._parse_uv_coord( line )
         
     def _parse_vertex( self, line ):
-        vertex = []
-        for coord, scale in zip( line[1:], self.scale ):
-            vertex.append( float(coord) * scale )
+        vertex = [ float(c) for c in line[1:] ]
         self.vertices.append( vertex )
 
         # update bounds to include this vertex's coords
@@ -89,17 +86,12 @@ class Textured_Mesh:
                 self.bounds[1][i] = coord
             
     def _parse_face( self, line ):
-        face = []
-        for i in range( len(line) - 1 ):
-            face.append( int(line[i + 1]) )
+        face = [ int(v) for v in line[1:] ]
         self.faces.append( face )
 
     def _parse_uv_coord( self, line ):
-        uv_coord = []
-        for i in range( len(line) - 1 ):
-            if( i % 2 == 0 ):
-                pair = [float(line[i + 1]), float(line[i + 2])]
-                uv_coord.append( pair )
+        uv_coord = [ [float(c) for c in line[i:i+2]]
+                      for i in range(1, len(line), 2) ]
         self.uv_coords.append( uv_coord )
 
     def _load_texture_image( self, texture_file ):

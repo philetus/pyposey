@@ -37,21 +37,30 @@ class Edited_Mesh_Window( gtk.Window ):
         # connect camera handlers to local methods
         self.camera.handle_draw = self.handle_draw
 
+        print "finished init"
+
     def handle_draw( self ):
+        #print "drawing ...",
+        try:
+            
+            # draw axes
+            if self.axes:
+                quadratic = gluNewQuadric()
+                glRotate( 90.0, 0.0, 1.0, 0.0 )
+                gluCylinder( quadratic, 30.0, 10.0, 71.5, 32, 32 )
+                glRotate( -90.0, 0.0, 1.0, 0.0 )
+                gluCylinder( quadratic, 30.0, 10.0, 71.5, 32, 32 )
+                glRotate( -90.0, 0.0, 1.0, 0.0 )
+                gluCylinder( quadratic, 30.0, 10.0, 71.5, 32, 32 )
+                glRotate( -90.0, 0.0, 1.0, 0.0 )
+            
+            # draw mesh
+            self.mesh.draw()
 
-        # draw axes
-        if self.axes:
-            quadratic = gluNewQuadric()
-            glRotate( 90.0, 0.0, 1.0, 0.0 )
-            gluCylinder( quadratic, 30.0, 10.0, 71.5, 32, 32 )
-            glRotate( -90.0, 0.0, 1.0, 0.0 )
-            gluCylinder( quadratic, 30.0, 10.0, 71.5, 32, 32 )
-            glRotate( -90.0, 0.0, 1.0, 0.0 )
-            gluCylinder( quadratic, 30.0, 10.0, 71.5, 32, 32 )
-            glRotate( -90.0, 0.0, 1.0, 0.0 )
+        except Exception, error:
+            print "failed to draw:", str(error)
 
-        # draw mesh
-        self.mesh.draw()
+        #print "done drawing"
 
     def redraw( self ):
         """add a redraw request to opengl widget event queue

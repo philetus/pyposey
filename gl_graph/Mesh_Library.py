@@ -66,8 +66,6 @@ class Mesh_Library( sax.handler.ContentHandler ):
         args = {}
         args["name"] = str( attrs["name"] )
         args["part_type"] = str( attrs["part_type"] )
-        stl_filename = str( attrs["stl_file"] )
-        thumbnail_filename = str( attrs["thumbnail_file"] )
         args["specular"] = self._parse_floats( str(attrs["specular"]) )
         args["shininess"] = float( str(attrs["shininess"]) )
         args["diffuse"] = self._parse_floats( str(attrs["diffuse"]) )
@@ -76,9 +74,6 @@ class Mesh_Library( sax.handler.ContentHandler ):
         args["parent_offsets"] = self._parse_floats(
             str(attrs["parent_offsets"]) )
 
-        scale = self._parse_option( attrs, "scale" )
-        if scale is not None:
-            args["scale"] = scale
         if attrs.has_key( "flips" ):
             args["flips"] = float( attrs["flips"] )
         flip_axis = self._parse_option( attrs, "flip_axis" )
@@ -87,6 +82,8 @@ class Mesh_Library( sax.handler.ContentHandler ):
 
         # try to open data files and create stl mesh object,
         # if mesh fails to load just print error message
+        stl_filename = str( attrs["stl_file"] )
+        thumbnail_filename = str( attrs["thumbnail_file"] )
         try:
 
             args["stl_file"] = open(
@@ -114,17 +111,11 @@ class Mesh_Library( sax.handler.ContentHandler ):
         # get attributes
         args["name"] = str( attrs["name"] )
         args["part_type"] = str( attrs["part_type"] )
-        geometry_filename = str( attrs["geometry_file"] )
-        texture_filename = str( attrs["texture_file"] )
-        thumbnail_filename = str( attrs["thumbnail_file"] )
         args["parent_angles"] = self._parse_float_lists(
             str(attrs["parent_angles"]) )
         args["parent_offsets"] = self._parse_floats(
             str(attrs["parent_offsets"]) )
 
-        scale = self._parse_option( attrs, "scale" )
-        if scale is not None:
-            args["scale"] = scale
         flips = None
         if attrs.has_key( "flips" ):
             args["flips"] = float( attrs["flips"] )
@@ -134,6 +125,10 @@ class Mesh_Library( sax.handler.ContentHandler ):
 
         # try to open data files and create textured mesh object,
         # if mesh fails to load just print error message
+        geometry_filename = str( attrs["geometry_file"] )
+        texture_filename = str( attrs["texture_file"] )
+        thumbnail_filename = str( attrs["thumbnail_file"] )
+
         try:
             args["geometry_file"] = open(
                 path.join(self.folder, geometry_filename), "r" )
