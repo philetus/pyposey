@@ -62,7 +62,7 @@ class Gimpy_Graph_Window( gtk.Window ):
         """
         self.graph_visitor.draw()
 
-    def handle_press( self, x, y ):
+    def _select_node( self, x, y ):
         """set selected graph node when pointer is pressed
         """
         # clear currently selected node
@@ -81,6 +81,10 @@ class Gimpy_Graph_Window( gtk.Window ):
             node = self.assembly_graph[address]
             self.selected = node
             node.selected = True
+
+    def handle_press( self, x, y ):
+        # select top node under pointer
+        self._select_node( x, y )
 
         # redraw window
         self.redraw()
