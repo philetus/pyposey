@@ -174,6 +174,11 @@ class Assembly_Graph( Thread ):
         hub = self.parts[hub_address]
         socket = hub[socket_index]
 
+        # if socket is not connected just log warning and return
+        if socket.ball is None:
+            self.LOG.warn( "can't disconnect %s: not connected!" % str(socket) )
+            return
+
         # get ball and strut
         ball = socket.ball
         strut = ball.strut
