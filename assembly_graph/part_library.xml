@@ -19,6 +19,21 @@
         children="2"
         rootness="0.0"
     />
+    <part address="3, 21"
+        part_type="strut"
+        children="2"
+        rootness="0.0"
+    />
+    <part address="3, 22"
+        part_type="strut"
+        children="2"
+        rootness="0.0"
+    />
+    <part address="3, 23"
+        part_type="strut"
+        children="2"
+        rootness="0.0"
+    />
     <part address="42, 2"
         part_type="one hub"
         children="1"
@@ -44,6 +59,30 @@
         part_type="one hub"
         children="1"
         rootness="3.0"
+    />
+    <part
+        address="69, 8"
+        part_type="two hub"
+        children="2"
+        rootness="3.2"
+    />
+    <part
+        address="69, 9"
+        part_type="two hub"
+        children="2"
+        rootness="3.2"
+    />
+    <part
+        address="17, 4"
+        part_type="three hub"
+        children="3"
+        rootness="3.5"
+    />
+    <part
+        address="17, 5"
+        part_type="three hub"
+        children="3"
+        rootness="3.5"
     />
     <part address="88, 1"
         part_type="four hub"

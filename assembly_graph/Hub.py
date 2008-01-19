@@ -11,6 +11,10 @@ class Hub:
         self.type = part_type
         self.subgraph = None
 
+        # hubs with accelerometers will have a vector indicating which way is
+        # up set by the assembly demon
+        self.up = None
+
         # add sockets to sockets list
         self.sockets = []
         for i in range( children ):
@@ -18,11 +22,15 @@ class Hub:
                              index=i )
             self.sockets.append( socket )
 
+    def __repr__( self ):
+        return "<hub %d.%d />" % self.address
+
     def __getitem__( self, key ):
         return self.sockets[key]
 
     def __iter__( self ):
-        return self.sockets.itervalues()
+        for socket in self.sockets:
+            yield socket
 
     def __len__( self ):
         return len( self.sockets )

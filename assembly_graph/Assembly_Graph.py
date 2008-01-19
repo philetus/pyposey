@@ -106,9 +106,20 @@ class Assembly_Graph( Thread ):
         strut_address = event["strut"]
         ball_index = event["ball"]
         
-        # get hub
+        # get hub and socket
         hub = self.parts[hub_address]
+        socket = hub[socket_index]
 
+        # if ball or socket is already connected disconnect it first
+        if socket.ball is not None:
+            self._disconnect({ "hub":hub.address, "socket":socket.index })
+        if strut_address in self.parts:
+            ball = self.parts[strut_address][ball_index]
+            if ball.socket is not None:
+                s = ball.socket
+                h = s.hub
+                self._disconnect({ "hub":h.address, "socket":s.index })
+            
         # if strut doesn't exist create it and add it to hub's subgraph
         strut = None
         if not self.parts.has_key( strut_address ):
@@ -130,7 +141,6 @@ class Assembly_Graph( Thread ):
                 self.subgraphs.remove( deadgraph )
 
         # connect ball and socket
-        socket = hub[socket_index]
         ball = strut[ball_index]
         socket.connect( ball )
 

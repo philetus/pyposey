@@ -22,7 +22,7 @@ class Sensor_Demon( Thread ):
        }
            
     """
-    LOG = Log( name='pyflexy.hardware_demon.Sensor_Demon', level=Log.INFO )
+    LOG = Log( name='pyflexy.hardware_demon.Sensor_Demon', level=Log.WARN )
     
     TAG_PATTERN = re.compile(
         r'<connect_event\s+hub_address="([^"<>]+)"\s+'

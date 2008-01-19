@@ -18,6 +18,9 @@ class Strut:
                          index=i )
             self.balls.append( ball )
 
+    def __repr__( self ):
+        return "<strut %d.%d />" % self.address
+
     def __getitem__( self, key ):
         return self.balls[key]
 

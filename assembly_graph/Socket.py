@@ -12,6 +12,10 @@ class Socket:
         self.hub = hub
         self.index = index
 
+        # distance to parent centroid
+        self.parent_angle = None
+        self.parent_offset = None
+
         # ball this socket is connected to
         self.ball = None
 
@@ -30,14 +34,10 @@ class Socket:
     def connect( self, ball ):
         """connect this socket to given ball
         """
-        if self.ball is not None:
-            self.LOG.error(
-                "connect to ball %s forcing socket to disconnect from ball %s!"
-                % (str(self.ball), str(ball)) )
-        if ball.socket is not None:
-            self.LOG.error(
-                "connect to socket %s forcing disconnect from socket %s!"
-                % (str(self), str(ball.socket))  )
+        # make sure ball and socket are disconnected
+        assert self.ball is None
+        assert ball.socket is None
+
         self.ball = ball
         ball.socket = self
 

@@ -1,4 +1,6 @@
 from xml import sax
+from Hub import Hub
+from Strut import Strut
 
 class Part_Library( sax.handler.ContentHandler ):
     """library loads given hub and strut classes with data from a config file
@@ -6,7 +8,8 @@ class Part_Library( sax.handler.ContentHandler ):
     STRUT_TYPES = set([ "strut" ])
     HUB_TYPES = set([ "one hub", "two hub", "three hub", "four hub" ])
     
-    def __init__( self, hub_class, strut_class, filename="part_library.xml" ):
+    def __init__( self, hub_class=Hub, strut_class=Strut,
+                  filename="part_library.xml" ):
         """
         """
         # dictionary of parts by address
