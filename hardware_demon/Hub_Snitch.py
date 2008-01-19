@@ -56,7 +56,7 @@ class Hub_Snitch( object ):
 
         # otherwise recalculate socket angles and send configure event
         else:
-            self._calculate_angle( socket_index )
+            self._calculate_angle( event )
 
     def _is_zero_couple( self, event ):
         """return true if strut index is all zeros signifying disconnect
@@ -117,9 +117,10 @@ class Hub_Snitch( object ):
                              "hub":self.index} )
             del self.snitches[self.index]
 
-    def _calculate_angle( self, socket_index ):
+    def _calculate_angle( self, event ):
         """generate new angle values for socket using lookup table for couples
         """
+        socket_index = event["socket_index"]
         socket = self.sockets[socket_index]
         
         couple_set = frozenset( socket.couples.iteritems() )
@@ -140,6 +141,8 @@ class Hub_Snitch( object ):
             self.queue.put( {"type":"configure",
                              "hub":self.index,
                              "socket":socket_index,
+                             "strut":event["strut_address"],
+                             "ball":event["ball_index"],
                              "roll":tuple(socket.angle[0]),
                              "pitch":tuple(socket.angle[1]),
                              "yaw":tuple(socket.angle[2])} )

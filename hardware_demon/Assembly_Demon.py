@@ -49,6 +49,8 @@ class Assembly_Demon( Thread ):
            type:    "configure"
            hub:     ( <high_byte>, <low_byte> )
            socket:  <0-3>
+           strut:   ( <high_byte>, <low_byte> )
+           ball:    <0-1>
            roll:    ( <min>, <max> )
            pitch:   ( <min>, <max> )
            yaw:     ( <min>, <max> )           

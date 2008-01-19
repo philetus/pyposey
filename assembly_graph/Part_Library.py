@@ -27,6 +27,9 @@ class Part_Library( sax.handler.ContentHandler ):
         # close library file
         library_file.close()
 
+    def __contains__( self, key ):
+        return self.parts.__contains__( key )
+
     def __getitem__( self, key ):
         return self.parts[key]
 

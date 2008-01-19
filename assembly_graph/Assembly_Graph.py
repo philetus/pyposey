@@ -80,6 +80,12 @@ class Assembly_Graph( Thread ):
         """
         address = event["hub"]
 
+        # if hub not in parts dictionary just return
+        if address not in self.parts:
+            self.LOG.warn( "can't destroy hub %s: doesn't exist!"
+                           % str(address) )
+            return
+
         # get hub by address
         hub = self.parts[address]
 
@@ -105,6 +111,12 @@ class Assembly_Graph( Thread ):
         socket_index = event["socket"]
         strut_address = event["strut"]
         ball_index = event["ball"]
+
+        # if strut address not in part library just return
+        if strut_address not in self.part_library:
+            self.LOG.warn( "can't connect to strut %s: not in library!"
+                           % str(strut_address) )
+            return
         
         # get hub and socket
         hub = self.parts[hub_address]
@@ -112,13 +124,22 @@ class Assembly_Graph( Thread ):
 
         # if ball or socket is already connected disconnect it first
         if socket.ball is not None:
+            self.LOG.warn( "%s forced to disconnect from %s!"
+                           % (str(socket), str(socket.ball)) )
             self._disconnect({ "hub":hub.address, "socket":socket.index })
         if strut_address in self.parts:
             ball = self.parts[strut_address][ball_index]
             if ball.socket is not None:
+                self.LOG.warn( "%s forced to disconnect from %s!"
+                               % (str(ball), str(ball.socket)) )
                 s = ball.socket
                 h = s.hub
                 self._disconnect({ "hub":h.address, "socket":s.index })
+
+                # if after forced disconnect hub is no longer connected
+                # to anything destroy it
+                if len( h.get_connected() ) < 1:
+                    self._destroy({ "hub":h.address })
             
         # if strut doesn't exist create it and add it to hub's subgraph
         strut = None
@@ -169,7 +190,13 @@ class Assembly_Graph( Thread ):
         """
         hub_address = event["hub"]
         socket_index = event["socket"]
-    
+
+        # if hub not in parts dictionary just return
+        if hub_address not in self.parts:
+            self.LOG.warn( "can't disconnect hub %s: doesn't exist!"
+                           % str(hub_address) )
+            return
+
         # get hub and socket
         hub = self.parts[hub_address]
         socket = hub[socket_index]
@@ -204,8 +231,11 @@ class Assembly_Graph( Thread ):
     def _configure( self, event ):
         """change roll, pitch and yaw of socket
         """
-        # get hub
-        hub = self.parts[event["hub"]]
+        # get hub, if there is no hub create it
+        hub_address = event["hub"]
+        if hub_address not in self.parts:
+            self._create({ "hub":hub_address })
+        hub = self.parts[hub_address]
 
         # change socket angle
         socket_index = event["socket"]
@@ -213,4 +243,8 @@ class Assembly_Graph( Thread ):
         socket.set_angle( roll=event["roll"],
                           pitch=event["pitch"],
                           yaw=event["yaw"] )
+
+        # if socket not connected, connect it
+        if socket.ball is None:
+            self._connect( event )
         
