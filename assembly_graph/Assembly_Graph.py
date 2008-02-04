@@ -240,9 +240,7 @@ class Assembly_Graph( Thread ):
         # change socket angle
         socket_index = event["socket"]
         socket = hub[socket_index]
-        socket.set_angle( roll=event["roll"],
-                          pitch=event["pitch"],
-                          yaw=event["yaw"] )
+        socket.set_coords( *event["coords"] )
 
         # if socket not connected, connect it
         if socket.ball is None:

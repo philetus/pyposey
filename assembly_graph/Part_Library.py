@@ -1,4 +1,5 @@
 from xml import sax
+import re
 from Hub import Hub
 from Strut import Strut
 
@@ -7,6 +8,7 @@ class Part_Library( sax.handler.ContentHandler ):
     """
     STRUT_TYPES = set([ "strut" ])
     HUB_TYPES = set([ "one hub", "two hub", "three hub", "four hub" ])
+    LIST_PATTERN = re.compile( r'\(([\d\.\-\s]+)\)' )
     
     def __init__( self, hub_class=Hub, strut_class=Strut,
                   filename="part_library.xml" ):
@@ -51,6 +53,9 @@ class Part_Library( sax.handler.ContentHandler ):
             label = "x"
             if attrs.has_key( "label" ):
                 label = str(attrs["label"])
+            transforms = None
+            if attrs.has_key( "transforms" ):
+                transforms = self._parse_float_lists( str(attrs["transforms"]) )
             
             # generate part and add it to dictionary by address
             part_class = None
@@ -63,9 +68,10 @@ class Part_Library( sax.handler.ContentHandler ):
                 
             part = part_class( address=address,
                                children=children,
+                               transforms=transforms,
                                part_type=part_type,
                                rootness=rootness,
-                               label = label)
+                               label = label )
             self.parts[address] = part
             
         else:
@@ -74,3 +80,12 @@ class Part_Library( sax.handler.ContentHandler ):
 
     def _parse_address( self, string ):
         return tuple( int(s) for s in string.split(", ") )
+
+    def _parse_float_lists( self, string ):
+        """parse lol from string formatted as "(1.0 0.0 1.0) (0.0 0.0 3.0) ..."
+        """
+        float_lists = []
+        for match in self.LIST_PATTERN.finditer( string ):
+            l = [ float(s) for s in match.group(1).split() ]
+            float_lists.append( l )
+        return float_lists
