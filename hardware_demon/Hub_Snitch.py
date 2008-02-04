@@ -122,30 +122,26 @@ class Hub_Snitch( object ):
         """
         socket_index = event["socket_index"]
         socket = self.sockets[socket_index]
-        
-        couple_set = frozenset( socket.couples.iteritems() )
+
+        # get couples sorted most recent first by timestamp
+        stamped_couples = list( socket.couples.values() )
+        stamped_couples.sort( reverse=True )
+
+        # make tuple of tuples of couples stripped of timestamps
+        couples = tuple( tuple(couple[1:]) for couple in stamped_couples )
 
         try:
-            socket.last_coords = self.couple_map.get_nearest(
-                socket.last_coords, *couple_set )
+            coords = self.couple_map.get_coords( *couples )
 
-            self.LOG.info( "couples: %s"
-                           % str(list(socket.couples.iteritems())) )
-
-            self.LOG.info( "nearest: %s" % str(socket.last_coords) )
-
-            for i in range( 3 ):
-                for j in range( 2 ):
-                    socket.angle[i][j] = socket.last_coords[i]
+            self.LOG.info( "couples: %s" % str(socket.couples.values()) )
+            self.LOG.info( "coords: %s" % str(socket.coords) )
                     
             self.queue.put( {"type":"configure",
                              "hub":self.index,
                              "socket":socket_index,
                              "strut":event["strut_address"],
                              "ball":event["ball_index"],
-                             "roll":tuple(socket.angle[0]),
-                             "pitch":tuple(socket.angle[1]),
-                             "yaw":tuple(socket.angle[2])} )
+                             "coords":coords} )
             
         except KeyError:
             self.LOG.warn( "no mapping for couple %s" % str(couple_set) )
@@ -153,16 +149,14 @@ class Hub_Snitch( object ):
     class Socket( object ):
         """tracks socket state
         """
-        LOG = Log( name='pyflexy.hardware_demon.Hub_Snitch.Socket',
+        LOG = Log( name='pyposey.hardware_demon.Hub_Snitch.Socket',
                    level=Log.DEBUG )
         SENSORS = 4 # number of sensors per socket
         
         def __init__( self ):
             self.strut = None # index of connected strut
             self.ball = None # index of connected ball
-            self.angle = [[0, 0], [0, 0], [0, 0]] # [roll, pitch, yaw]
-            self.couples = {} # dict of sensor:emitter couples
-            self.last_coords = [0.0, 0.0, 0.0] # last r, p, y coords
+            self.couples = {} # dict of sensor:(stamp,sensor,emitter) couples
 
         def clear_couple( self, sensor ):
             # if given sensor is not already coupled log warning and fail
@@ -196,4 +190,4 @@ class Hub_Snitch( object ):
                         % (self.strut[0], self.strut[1], self.ball,
                            strut[0], strut[1], ball) )
             
-            self.couples[sensor] = emitter
+            self.couples[sensor] = ( time(), sensor, emitter )

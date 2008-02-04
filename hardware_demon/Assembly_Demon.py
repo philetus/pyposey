@@ -5,7 +5,7 @@ from time import time
 from pyposey.util.Log import Log
 
 from Hub_Snitch import Hub_Snitch
-from Couple_Map import Couple_Map
+from Polar_Couple_Map import Polar_Couple_Map
 
 class Assembly_Demon( Thread ):
     """reads couple events from sensor queue and generates assembly events
@@ -74,9 +74,9 @@ class Assembly_Demon( Thread ):
         self._snitches = {}
 
         # generate couple map
-        self.couple_map = Couple_Map()
+        self.couple_map = Polar_Couple_Map()
 
-        #
+        # sockets waiting to be disconnected
         self.probates = {}
         
     def run( self ):

@@ -11,15 +11,17 @@ class Polar_Couple_Map:
     """
     LOG = Log( name='pyposey.hardware_demon.Couple_Map', level=Log.DEBUG )
 
-    def __init__( self, step=20 ):
+    def __init__( self, step=10 ):
         self.step = step
         self.nodes = {}
         self.couples = {}
-        
+
+        print "map[",
         self._build_map()
+        print "]"
         
-    def possible_nodes( self, *couples ):
-        """build set of possible nodes
+    def get_coords( self, *couples ):
+        """build list of possible coordinate nodes given list of couples
         """
         # if no couples return empty set
         if len( couples ) < 1:
@@ -52,7 +54,7 @@ class Polar_Couple_Map:
             else:
                 possible = new
                 
-        return possible
+        return tuple( possible )
     
     def _build_map( self ):
         nuetral = Polar_Vector3().set_heading( 0, 0 )
@@ -65,7 +67,7 @@ class Polar_Couple_Map:
         # generate (lat, lon, rot) keys for nodes at given distribution
         for lat in range( 0, 110, self.step ):
 
-            print "\n%d >" % lat,
+            print ">",
             
             # calculate lon step at lat
             lon_step = 360
@@ -74,7 +76,7 @@ class Polar_Couple_Map:
 
             for lon in range( 0, 360, lon_step ):
 
-                print "#",
+                #print ">",
 
                 # matrix to rotate a step around heading
                 rotate_by_heading = None
