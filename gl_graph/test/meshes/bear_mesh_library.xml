@@ -6,7 +6,7 @@
         thumbnail_file="bear_head_thumbnail.png"
         parent_angles="(0.0, 0.0, 0.0)"
         parent_offsets="0.0"
-        scale="30.0, 30.0, 30.0"
+        scale="40.0, 40.0, 40.0"
     />
     <textured_mesh
         name="bear_left_arm"
@@ -16,7 +16,7 @@
         thumbnail_file="bear_arm_thumbnail.png"
         parent_angles="(0., 0., 180.), (180., 0., 0.)"
         parent_offsets="0.0, 143.0"
-        scale="30.0, 30.0, 30.0"
+        scale="40.0, 40.0, 40.0"
     />
     <textured_mesh
         name="bear_right_arm"
@@ -26,7 +26,7 @@
         thumbnail_file="bear_arm_thumbnail.png"
         parent_angles="(0., 0., 180.), (180., 0., 0.)"
         parent_offsets="0.0, 143.0"
-        scale="30.0, 30.0, 30.0"
+        scale="40.0, 40.0, 40.0"
     />
     <textured_mesh
         name="bear_left_leg"
@@ -36,7 +36,7 @@
         thumbnail_file="bear_leg_thumbnail.png"
         parent_angles="(0., 0., 180.), (180., 0., 0.)"
         parent_offsets="0.0, 143.0"
-        scale="30.0, 30.0, 30.0"
+        scale="40.0, 40.0, 40.0"
     />
     <textured_mesh
         name="bear_right_leg"
@@ -46,7 +46,7 @@
         thumbnail_file="bear_leg_thumbnail.png"
         parent_angles="(0., 0., 180.), (180., 0., 0.)"
         parent_offsets="0.0, 143.0"
-        scale="30.0, 30.0, 30.0"
+        scale="40.0, 40.0, 40.0"
     />
     <textured_mesh
         name="bear_neck"
@@ -55,8 +55,8 @@
         texture_file="bear_torso_texture.png"
         thumbnail_file="bear_chest_thumbnail.png"
         parent_angles="(0., 0., 180.), (180., 0., 0.)"
-        parent_offsets="0.0, 143.0"
-        scale="30.0, 30.0, 30.0"
+        parent_offsets="0.0, 25.0"
+        scale="40.0, 40.0, 40.0"
     />
     <textured_mesh
         name="bear_chest"
@@ -65,8 +65,8 @@
         texture_file="bear_torso_texture.png"
         thumbnail_file="bear_chest_thumbnail.png"
         parent_angles="(0., 0., 0.), (0., 0., 90.), (0., 0., 180.), (0., 0., 270.)"
-        parent_offsets="60.97, 60.97, 60.97, 60.97"
-        scale="30.0, 30.0, 30.0"
+        parent_offsets="25.0, 25.0, 25.0, 25.0"
+        scale="40.0, 40.0, 40.0"
     />
     <textured_mesh
         name="bear_abdomen"
@@ -76,7 +76,7 @@
         thumbnail_file="bear_chest_thumbnail.png"
         parent_angles="(0., 0., 180.), (180., 0., 0.)"
         parent_offsets="0.0, 143.0"
-        scale="30.0, 30.0, 30.0"
+        scale="40.0, 40.0, 40.0"
     />
     <textured_mesh
         name="bear_waist"
@@ -86,6 +86,6 @@
         thumbnail_file="bear_chest_thumbnail.png"
         parent_angles="(0., 0., 0.), (0., 0., 120.), (0., 0., 240.)"
         parent_offsets="60.97, 60.97, 60.97"
-        scale="30.0, 30.0, 30.0"
+        scale="40.0, 40.0, 40.0"
     />
 </mesh_library>

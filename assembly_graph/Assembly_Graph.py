@@ -1,8 +1,7 @@
 from threading import Thread, Lock
-
 from pyposey.util.Log import Log
-
 from Assembly_Subgraph import Assembly_Subgraph
+from Graph_Visitor import Graph_Visitor
 
 class Assembly_Graph( Thread ):
     """pulls assembly events from queue and builds graph
@@ -11,7 +10,7 @@ class Assembly_Graph( Thread ):
 
     EVENTS = set([ "create", "destroy", "connect", "disconnect", "configure" ])
 
-    def __init__( self, event_queue, part_library ):
+    def __init__( self, event_queue, part_library, orient=False ):
         Thread.__init__( self )
 
         # event queue to pull events from
@@ -26,8 +25,25 @@ class Assembly_Graph( Thread ):
         self.lock = Lock() # graph modify lock
         self.observers = [] # list of observer functions to call on change
 
+        # if orient flag is set, build graph visitor to orient parts on
+        # change and add its orient method to the list of graph observers
+        if orient:
+            self.visitor = Graph_Visitor( self )
+            self.observers.append( self.visitor.orient )
+
+            # check part library for transforms
+            for part in self.part_library:
+                for connector in part:
+                    if connector._transform is None:
+                        raise ValueError(
+                            "oriented assembly graph requires transform for %s!"
+                            % str(connector) )
+
     def __getitem__( self, key ):
         return self.parts[key]
+
+    def __iter__( self ):
+        return self.parts.itervalues()
 
     def run( self ):
         """read events from queue and update node graph
@@ -123,17 +139,17 @@ class Assembly_Graph( Thread ):
         socket = hub[socket_index]
 
         # if ball or socket is already connected disconnect it first
-        if socket.ball is not None:
+        if socket.connected is not None:
             self.LOG.warn( "%s forced to disconnect from %s!"
-                           % (str(socket), str(socket.ball)) )
+                           % (str(socket), str(socket.connected)) )
             self._disconnect({ "hub":hub.address, "socket":socket.index })
         if strut_address in self.parts:
             ball = self.parts[strut_address][ball_index]
-            if ball.socket is not None:
+            if ball.connected is not None:
                 self.LOG.warn( "%s forced to disconnect from %s!"
-                               % (str(ball), str(ball.socket)) )
-                s = ball.socket
-                h = s.hub
+                               % (str(ball), str(ball.connected)) )
+                s = ball.connected
+                h = s.parent
                 self._disconnect({ "hub":h.address, "socket":s.index })
 
                 # if after forced disconnect hub is no longer connected
@@ -202,13 +218,13 @@ class Assembly_Graph( Thread ):
         socket = hub[socket_index]
 
         # if socket is not connected just log warning and return
-        if socket.ball is None:
+        if socket.connected is None:
             self.LOG.warn( "can't disconnect %s: not connected!" % str(socket) )
             return
 
         # get ball and strut
-        ball = socket.ball
-        strut = ball.strut
+        ball = socket.connected
+        strut = ball.parent
 
         # disconnect socket
         socket.disconnect()
@@ -243,6 +259,6 @@ class Assembly_Graph( Thread ):
         socket.set_coords( *event["coords"] )
 
         # if socket not connected, connect it
-        if socket.ball is None:
+        if socket.connected is None:
             self._connect( event )
         

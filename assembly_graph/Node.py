@@ -11,7 +11,8 @@ class Node:
         self.type = args["part_type"] if "part_type" in args else None
 
         # list of transforms for each child
-        transforms = (args["transforms"] if "transforms" in args
+        transforms = (args["transforms"] if
+                      ("transforms" in args and args["transforms"] is not None)
                       else [ None ] * children)
         assert len(transforms) == children
 

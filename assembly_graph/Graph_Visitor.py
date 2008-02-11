@@ -19,7 +19,7 @@ class Graph_Visitor:
         # nodes visited during rendering
         self.visited = None
 
-    def orient( self ):
+    def orient( self, event ):
         """traverse graph and set position and orientation of hubs and struts
         """
         # acquire assembly graph lock before traversing graph
@@ -36,10 +36,10 @@ class Graph_Visitor:
                 self._seed_with_up_vector( hub )
                 
                 # visit hub and orient it
-                try:
-                    self._visit_node( hub )
-                except Exception, error:
-                    self.LOG.error( "visit hub failed: " + str(error) )
+                #try:
+                self._visit_node( hub )
+                #except Exception, error:
+                #    self.LOG.error( "visit hub failed: " + str(error) )
 
                 # clear visited set
                 self.visited = None
@@ -71,7 +71,7 @@ class Graph_Visitor:
         """orient children relative to this node
         """
         self.LOG.debug(  "visiting node ", node.address )
-        
+
         # add to visited set
         self.visited.add( node )
 

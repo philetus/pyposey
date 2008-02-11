@@ -5,7 +5,7 @@ from Assembly_Demon import Assembly_Demon
 
 class Fake_Queue( object ):
     def put( self, event ):
-        print event
+        pass #print event
         
 sensor_queue = Queue()
 assembly_queue = Fake_Queue()

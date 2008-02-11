@@ -19,6 +19,16 @@
         parent_angles="(0.0, 0.0, 0.0)"
         parent_offsets="0.0"
     />
+    <stl_mesh name="graphics two hub"
+        part_type="two hub"
+        stl_file="graphics_two_hub.stl"
+        thumbnail_file="graphics_two_hub_thumbnail.png"
+        specular="1.0, 1.0, 1.0, 1.0"
+        shininess="100.0"
+        diffuse="0.0, 0.7, 0.1, 1.0"
+        parent_angles="(0.0, 0.0, 180.0), (0., 0., 0.)"
+        parent_offsets="51.0, 51.0"
+    />
     <stl_mesh name="graphics three hub"
         part_type="three hub"
         stl_file="graphics_three_hub.stl"
@@ -26,7 +36,7 @@
         specular="1.0, 1.0, 1.0, 1.0"
         shininess="100.0"
         diffuse="0.7, 0.0, 0.0, 1.0"
-        parent_angles="(0., 0., 60.), (0., 0., 180.), (0., 0., 300.)"
+        parent_angles="(0., 0., 180.), (0., 0., 60.), (0., 0., 300.)"
         parent_offsets="53.00, 53.00, 53.00"
     />
     <stl_mesh name="graphics four hub"
@@ -36,7 +46,7 @@
         specular="1.0, 1.0, 1.0, 1.0"
         shininess="100.0"
         diffuse="0.0, 0.1, 0.7, 1.0"
-        parent_angles="(0., 0., 0.), (0., 0., 90.), (0., 0., 180.), (0., 0., 270.)"
+        parent_angles="(0., 0., 0.), (0., 0., 270.), (0., 0., 180.), (0., 0., 90.)"
         parent_offsets="60.97, 60.97, 60.97, 60.97"
     />
 </mesh_library>

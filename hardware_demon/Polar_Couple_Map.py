@@ -1,4 +1,5 @@
 import math
+from struct import pack, unpack
 from numpy import array
 from l33tC4D.vector.Polar_Vector3 import Polar_Vector3
 from l33tC4D.vector.Matrix3 import Matrix3
@@ -11,13 +12,24 @@ class Polar_Couple_Map:
     """
     LOG = Log( name='pyposey.hardware_demon.Couple_Map', level=Log.DEBUG )
 
-    def __init__( self, step=10 ):
+    def __init__( self, step=10, filename="couples.map" ):
         self.step = step
         self.nodes = {}
         self.couples = {}
 
+        
+
         print "map[",
-        self._build_map()
+
+        # try to load map
+        try:
+            self._load_map( filename )
+
+        # otherwise build it
+        except Exception, error:
+            self._build_map()
+            self._write_map( filename )
+            
         print "]"
         
     def get_coords( self, *couples ):
@@ -129,4 +141,51 @@ class Polar_Couple_Map:
                     # rotate one step around heading
                     map_ball.transform( rotate_by_heading )
 
+    def _load_map( self, filename ):
+        """load couple map from binary file
+        """
+        map_file = open( filename, "rb" )
+        try:
 
+            # read number of couples in map file
+            num_couples = unpack( "h", map_file.read(2) )[0]
+
+            # read couples in from file
+            for i in range( num_couples ):
+
+                # read couples and number of coords for couple
+                sensor, emitter, num_coords = unpack( "hhh", map_file.read(6) )
+
+                # read coords
+                self.coords[sensor, emitter] = set()
+                for j in range( num_coords ):
+                    lat, lon, rot = unpack( "hhh", map_file.read(6) )
+                    self.coords[sensor, emitter].add( (lat, lon, rot) )
+                    
+        finally:
+            map_file.close()
+
+    def _write_map( self, filename ):
+        """write couple map to binary map file
+        """
+        map_file = open( filename, "wb" )
+        try:
+
+            # write number of couples'
+            couples = sorted( self.couples )
+            map_file.write( pack("h", len(couples)) )
+
+            # write each couple
+            for sensor, emitter in couples:
+                coords = sorted( self.couples[sensor, emitter] )
+
+                # write couple and number of coords
+                map_file.write( pack("hhh", sensor, emitter, len(coords)) )
+
+                # write each coord
+                for coord in coords:
+                    map_file.write( pack("hhh", *coord) )
+    
+        finally:
+            map_file.close()
+            

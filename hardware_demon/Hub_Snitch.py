@@ -4,7 +4,7 @@ from pyposey.util.Log import Log
 class Hub_Snitch( object ):
     """interprets events from one hub and tracks hub state
     """
-    LOG = Log( name='pyflexy.hardware_demon.Hub_Snitch', level=Log.WARN )
+    LOG = Log( name='pyflexy.hardware_demon.Hub_Snitch', level=Log.INFO )
 
     def __init__( self, index=None, queue=None,
                   couple_map=None, snitches=None, probates=None ):
@@ -133,8 +133,8 @@ class Hub_Snitch( object ):
         try:
             coords = self.couple_map.get_coords( *couples )
 
-            self.LOG.info( "couples: %s" % str(socket.couples.values()) )
-            self.LOG.info( "coords: %s" % str(socket.coords) )
+            self.LOG.info( "couples: %s" % str(couples) )
+            self.LOG.info( "coords: %s" % str(coords) )
                     
             self.queue.put( {"type":"configure",
                              "hub":self.index,

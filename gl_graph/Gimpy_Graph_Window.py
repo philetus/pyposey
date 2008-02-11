@@ -1,9 +1,5 @@
 import gtk
-
-from pyposey.assembly_graph.Assembly_Graph import Assembly_Graph
-
 from Gimpy_Camera import Gimpy_Camera
-from GL_Graph_Visitor import GL_Graph_Visitor
 
 class Gimpy_Graph_Window( gtk.Window ):
     """window for rendering a posey assembly with opengl
@@ -14,19 +10,12 @@ class Gimpy_Graph_Window( gtk.Window ):
        gimpy camera opengl widget
     """
 
-    def __init__( self, part_library, event_queue, title="gimpy graph window",
+    def __init__( self, assembly_graph, title="gimpy graph window",
                   size=(800, 600) ):
+        self.graph = assembly_graph
+
         # gtk window init
         gtk.Window.__init__( self )
-
-        # load assembly graph with event queue and part library and start it
-        self.assembly_graph = Assembly_Graph( event_queue=event_queue,
-                                              part_library=part_library )
-        self.assembly_graph.start()
-
-
-        # load gl graph renderer to render assembly graph
-        self.graph_visitor = GL_Graph_Visitor( self.assembly_graph )
 
         # set title and size
         self.set_title( title )
@@ -47,7 +36,7 @@ class Gimpy_Graph_Window( gtk.Window ):
         self.camera.handle_press = self.handle_press
 
         # add redraw call to assembly graph observer methods
-        self.assembly_graph.observers.append( self._on_graph_event )
+        self.graph.observers.append( self._on_graph_event )
 
         # variable to hold currently selected graph node
         self.selected = None
@@ -58,9 +47,17 @@ class Gimpy_Graph_Window( gtk.Window ):
         pass
 
     def handle_draw( self ):
-        """call gl graph visitor to render assembly graph
+        """call each node to draw itself
         """
-        self.graph_visitor.draw()
+        # acquire assembly graph lock before drawing nodes
+        self.graph.lock.acquire()
+        try:
+
+            for node in self.graph:
+                node.draw()
+
+        finally:
+            self.graph.lock.release()
 
     def _select_node( self, x, y ):
         """set selected graph node when pointer is pressed
@@ -78,7 +75,7 @@ class Gimpy_Graph_Window( gtk.Window ):
         if gl_names:
             gl_name = gl_names[0]
             address = (gl_name / 256), (gl_name % 256)
-            node = self.assembly_graph[address]
+            node = self.graph[address]
             self.selected = node
             node.selected = True
 

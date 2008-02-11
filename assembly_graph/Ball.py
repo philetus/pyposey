@@ -1,3 +1,4 @@
+from l33tC4D.vector.Matrix3 import Matrix3
 from Child import Child
 
 class Ball( Child ):
@@ -16,7 +17,7 @@ class Ball( Child ):
     def build_transforms( self ):
         """builf matrix to transform from child to parent
         """
-        if self._transform == None:
+        if self._transform is None:
             self.in_transform = None
             return
 

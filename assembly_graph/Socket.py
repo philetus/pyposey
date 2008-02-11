@@ -1,3 +1,4 @@
+from l33tC4D.vector.Matrix3 import Matrix3
 from l33tC4D.vector.Polar_Vector3 import Polar_Vector3
 from pyposey.util.Log import Log
 from Child import Child
@@ -7,6 +8,7 @@ class Socket( Child ):
     """
 
     LOG = Log( name='pyposey.assembly_graph.Socket', level=Log.WARN )
+    EPSILON = 0.1
     UP = Polar_Vector3().set_heading( 0, 0 )
     X = Polar_Vector3( (1, 0, 0) )
 
@@ -99,29 +101,32 @@ class Socket( Child ):
             self.out_transform = None
             return
 
-        # generate heading, axis and angle
-        heading = Polar_Vector3().set_heading( *self.current_coords[:2] )
-        axis = Polar_Vector3( heading ).cross( self.UP )
-        angle = self.UP.angle_to( heading )
-
         # build transform for rotation from ball to socket
         rotation = Matrix3()
-        rotation.rotate( angle, axis )
+
+        # generate heading, axis and angle
+        heading = Polar_Vector3().set_heading( *self.current_coords[:2] )
+        angle = self.UP.angle_to( heading )
+
+        # if angle to heading is nonzero rotate angle around axis
+        if angle > self.EPSILON:
+            axis = Polar_Vector3( heading ).cross( self.UP )
+            rotation.rotate( angle, axis )
+            
         rotation.rotate( self.current_coords[2], self.UP )
 
         # build in transform
-        i = Matrix3( rotation )
+        self.in_transform = Matrix3( rotation )
 
         # rotate 180 degrees around x axis to face out
-        i.rotate( 180, self.X )
+        self.in_transform.rotate( 180, self.X )
 
         # apply inverted base matrix to move to parent origin
-        i.transform( Matrix3(self._transform).invert() )
+        self.in_transform.transform( Matrix3(self._transform).invert() )
         
-        self.in_transform = i
-
         # build out transform
-        o = Matrix3( self._transform )
+        self.out_transform = Matrix3( self._transform )
 
         # apply inverse ball rotation to base transform to rotate back to ball
-        o.transform( rotation.invert() )
+        self.out_transform.transform( rotation.invert() )
+
