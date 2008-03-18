@@ -24,14 +24,23 @@ class Sensor_Demon( Thread ):
     """
     LOG = Log( name='pyflexy.hardware_demon.Sensor_Demon', level=Log.WARN )
     
-    TAG_PATTERN = re.compile(
-        r'<connect_event\s+hub_address="([^"<>]+)"\s+'
-        + r'strut_address="([^"<>]+)"\s+/>',
+    TAG_PATTERN = re.compile( r'<([^<>]+)/>' )
+    CONNECT_PATTERN = re.compile(
+        r'connect_event\s+hub_address="([^"]+)"\s+'
+        + r'strut_address="([^"]+)"\s+',
+        re.I )
+    ACCELEROMETER_PATTERN = re.compile(
+        r'accelerometer_value\s+'
+        + r'hub_address="([^"]+)"\s+'
+        + r'x="([^"]+)"\s+'
+        + r'y="([^"]+)"\s+'
+        + r'z="([^"]+)"\s+',
         re.I )
     RN_PATTERN = re.compile( r'\r|\n' )
 
     SENSORS = 4 # sensors per socket
     EMITTERS = 11 # emitters per ball
+    XML_BUFFER_SIZE = 4096 # max num characters to store in each xml buffer
 
     def __init__( self, sensor_queue=None, serial_port="/dev/ttyUSB0" ):
         """takes sensor queue to write to and xml stream to read from
@@ -77,36 +86,10 @@ class Sensor_Demon( Thread ):
 
             try:
                 
-                # if xml buffer has full tag parse it into couple event
+                # if xml buffer has full tag parse it
                 match = self.TAG_PATTERN.search( xml_buffer[address] )
                 if match is not None:
-                    
-                    # create new couple event dict
-                    event = { "type":"couple" }
-                    
-                    # read hub data into couple event
-                    raw = tuple( (int(i) for i in match.group(1).split(".")) )
-                    event["hub_address"] = raw[:-1]
-                    event["socket_index"] = raw[-1] / self.SENSORS
-                    event["sensor_index"] = raw[-1] % self.SENSORS
-
-                    # read strut data into couple event
-                    raw = tuple( (int(i) for i in match.group(2).split(".")) )
-                    event["strut_address"] = raw[:-1]
-                    event["ball_index"] = raw[-1] / self.EMITTERS
-                    event["emitter_index"] = raw[-1] % self.EMITTERS
-
-                    self.LOG.info( "<%d.%d.%d.%d %d.%d.%d.%d>"
-                                    % (event["hub_address"][0],
-                                       event["hub_address"][1],
-                                       event["socket_index"],
-                                       event["sensor_index"],
-                                       event["strut_address"][0],
-                                       event["strut_address"][1],
-                                       event["ball_index"],
-                                       event["emitter_index"]) )
-
-                    self.sensor_queue.put( event )
+                    self._parse_tag( match.group(1) )
 
                     # move to end of match
                     if match.start() > 0:
@@ -114,6 +97,11 @@ class Sensor_Demon( Thread ):
                             "unrecognized serial input: '%s'"
                             % xml_buffer[address][:match.start()] )
                     xml_buffer[address] = xml_buffer[address][match.end():]
+
+                elif len(xml_buffer[address]) > self.XML_BUFFER_SIZE:
+                    self.LOG.warn( "xml buffer overflow: %s"
+                                   % xml_buffer[address] )
+                    xml_buffer[address] = ""
 
             # recover from mangled tag
             except ValueError:
@@ -124,3 +112,67 @@ class Sensor_Demon( Thread ):
                 
         self.LOG.warn( "serial port closed!" )
 
+    def _parse_tag( self, contents ):
+        """parse event from contents of xml tag
+        """
+        # check if this is a connect event
+        match = self.CONNECT_PATTERN.match( contents )
+        if match is not None:
+            
+            # create new couple event dict
+            event = { "type":"couple" }
+            
+            # read hub data into couple event
+            raw = self._parse_tuple( match.group(1) )
+            event["hub_address"] = raw[:-1]
+            event["socket_index"] = raw[-1] / self.SENSORS
+            event["sensor_index"] = raw[-1] % self.SENSORS
+
+            # read strut data into couple event
+            raw = self._parse_tuple( match.group(2) )
+            event["strut_address"] = raw[:-1]
+            event["ball_index"] = raw[-1] / self.EMITTERS
+            event["emitter_index"] = raw[-1] % self.EMITTERS
+
+            self.LOG.info( "<%d.%d.%d.%d %d.%d.%d.%d>"
+                            % (event["hub_address"][0],
+                               event["hub_address"][1],
+                               event["socket_index"],
+                               event["sensor_index"],
+                               event["strut_address"][0],
+                               event["strut_address"][1],
+                               event["ball_index"],
+                               event["emitter_index"]) )
+
+            self.sensor_queue.put( event )
+            return
+
+        # check if this is an accelerometer value
+        match = self.ACCELEROMETER_PATTERN.match( contents )
+        if match is not None:
+
+            # create new accelerometer event dict
+            event = { "type":"accelerometer" }
+
+            # read hub data into event
+            event["hub_address"] = self._parse_tuple( match.group(1) )[:2]
+
+            # read xyz values into event
+            event["x"] = int( match.group(2), 16 )
+            event["y"] = int( match.group(3), 16 )
+            event["z"] = int( match.group(4), 16 )
+
+            self.LOG.info( "<%d.%d %d %d %d>" %
+                           (event["hub_address"][0], event["hub_address"][1],
+                            event["x"], event["y"], event["z"]) )
+
+            self.sensor_queue.put( event )
+            return
+
+        self.LOG.warn( "unrecognized tag contents: %s" % contents )
+                             
+
+    def _parse_tuple( self, string ):
+        """parse tuple from '.' separated ints: "32.9.7" -> (32, 9, 7)
+        """
+        return tuple( (int(i) for i in string.split(".")) )
