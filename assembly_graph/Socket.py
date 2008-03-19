@@ -93,7 +93,7 @@ class Socket( Child ):
             distances[distance] = coords
 
         # set coord with min distance as new coord
-        self.current_coord = distances[min(distances)]
+        self.current_coords = distances[min(distances)]
         
     def _build_transforms( self ):
         if self._transform is None:
@@ -114,7 +114,7 @@ class Socket( Child ):
             rotation.rotate( angle, axis )
             
         rotation.rotate( self.current_coords[2], self.UP )
-
+        
         # build in transform
         self.in_transform = Matrix3( rotation )
 

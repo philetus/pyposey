@@ -79,7 +79,7 @@ class Polar_Couple_Map:
         # generate (lat, lon, rot) keys for nodes at given distribution
         for lat in range( 0, 110, self.step ):
 
-            print ">",
+            #print ">",
             
             # calculate lon step at lat
             lon_step = 360
@@ -88,7 +88,7 @@ class Polar_Couple_Map:
 
             for lon in range( 0, 360, lon_step ):
 
-                #print ">",
+                print ">",
 
                 # matrix to rotate a step around heading
                 rotate_by_heading = None
@@ -146,6 +146,7 @@ class Polar_Couple_Map:
         """
         map_file = open( filename, "rb" )
         try:
+            self.couples = {}
 
             # read number of couples in map file
             num_couples = unpack( "h", map_file.read(2) )[0]
@@ -153,14 +154,16 @@ class Polar_Couple_Map:
             # read couples in from file
             for i in range( num_couples ):
 
+                print "/",
+
                 # read couples and number of coords for couple
                 sensor, emitter, num_coords = unpack( "hhh", map_file.read(6) )
 
                 # read coords
-                self.coords[sensor, emitter] = set()
+                self.couples[sensor, emitter] = set()
                 for j in range( num_coords ):
                     lat, lon, rot = unpack( "hhh", map_file.read(6) )
-                    self.coords[sensor, emitter].add( (lat, lon, rot) )
+                    self.couples[sensor, emitter].add( (lat, lon, rot) )
                     
         finally:
             map_file.close()
@@ -177,6 +180,8 @@ class Polar_Couple_Map:
 
             # write each couple
             for sensor, emitter in couples:
+                print ".",
+                
                 coords = sorted( self.couples[sensor, emitter] )
 
                 # write couple and number of coords
