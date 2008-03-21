@@ -5,7 +5,7 @@ from pyposey.util.Log import Log
 class Mesh_Node( object ):
     """mixin to render hubs and struts with meshes in opengl
     """
-    LOG = Log( name='pyposey.gl_graph.Mesh_Node', level=Log.DEBUG )
+    LOG = Log( name='pyposey.gl_graph.Mesh_Node', level=Log.INFO )
 
     def __init__( self, address ):
         self.gl_name = (int(self.address[0]) * 256) + int(self.address[1])

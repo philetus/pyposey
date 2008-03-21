@@ -17,3 +17,8 @@ class Child:
         # in and out of parent orientation
         self.in_transform = None
         self.out_transform = None
+
+    def _get_address( self ):
+        return self.parent.address + (self.index, )
+    
+    address = property( fget=_get_address )

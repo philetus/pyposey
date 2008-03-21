@@ -12,7 +12,7 @@ class Ball( Child ):
         self.build_transforms()
         
     def __repr__( self ):
-        return "<ball %d.%d.%d />" % ( self.parent.address + (self.index,) )
+        return "<ball %d.%d.%d />" % self.address
 
     def build_transforms( self ):
         """builf matrix to transform from child to parent
@@ -21,14 +21,14 @@ class Ball( Child ):
             self.in_transform = None
             return
 
-        # start with out transform
-        transform = Matrix3( self._transform )
+        # create transform
+        transform = Matrix3()
 
-        # rotate 180 degrees around x axis to flip z direction to face in
+        # rotate 180 degrees around x axis to face in
         transform.rotate( 180, self.X )
 
-        # invert to come back from there
-        transform.invert()
+        # apply inverted out transform to return to origin
+        transform.transform( Matrix3(self._transform).invert() )
 
         self.in_transform = transform
 

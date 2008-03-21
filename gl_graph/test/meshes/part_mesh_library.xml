@@ -1,7 +1,7 @@
 <mesh_library>
     <stl_mesh name="graphics strut"
         part_type="strut"
-        stl_file="graphics_strut.stl"
+        stl_file="graphics_strut_c.stl"
         thumbnail_file="graphics_strut_thumbnail.png"
         specular="1.0, 1.0, 1.0, 1.0"
         shininess="100.0"

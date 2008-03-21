@@ -7,7 +7,7 @@ class Socket( Child ):
     """a socket of a hub
     """
 
-    LOG = Log( name='pyposey.assembly_graph.Socket', level=Log.WARN )
+    LOG = Log( name='pyposey.assembly_graph.Socket', level=Log.INFO )
     EPSILON = 0.1
     UP = Polar_Vector3().set_heading( 0, 0 )
     X = Polar_Vector3( (1, 0, 0) )
@@ -23,7 +23,7 @@ class Socket( Child ):
         self._build_transforms()
 
     def __repr__( self ):
-        return "<socket %d.%d.%d />" % ( self.parent.address + (self.index,) )
+        return "<socket %d.%d.%d />" % self.address
 
     def set_coords( self, *coords ):
         """set list of possible (lon, lat, rot) coords
@@ -93,7 +93,11 @@ class Socket( Child ):
             distances[distance] = coords
 
         # set coord with min distance as new coord
-        self.current_coords = distances[min(distances)]
+        min_distance = min(distances)
+        self.current_coords = distances[min_distance]
+        
+        self.LOG.info( "%s picked new coord %s at distance %.1f"
+                       % (str(self), str(self.current_coords), min_distance) )
         
     def _build_transforms( self ):
         if self._transform is None:
@@ -118,7 +122,7 @@ class Socket( Child ):
         # build in transform
         self.in_transform = Matrix3( rotation )
 
-        # rotate 180 degrees around x axis to face out
+        # rotate 180 degrees around x axis to face in
         self.in_transform.rotate( 180, self.X )
 
         # apply inverted base matrix to move to parent origin
