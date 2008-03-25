@@ -54,6 +54,15 @@ class Assembly_Demon( Thread ):
            coords:     ( (<lon>, <lat>, <rot>) ... )           
        }
 
+       up event - set accelerometer reading of up direction
+       {
+            type:    "up"
+            hub:     ( <high_byte>, <low_byte> )
+            x:       <float>
+            y:       <float>
+            z:       <float>
+       }
+
     """
     LOG = Log( name='pyflexy.hardware_demon.Assembly_Demon', level=Log.INFO )
 

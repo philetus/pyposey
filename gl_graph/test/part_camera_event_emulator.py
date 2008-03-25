@@ -31,13 +31,6 @@ assembly_graph = Assembly_Graph( event_queue=event_queue,
                                  orient=True )
 
 # put some hardware events on sensor queue
-##sensor_queue.put( {"type":"couple",
-##                   "hub_address":(42,2),
-##                   "socket_index":0,
-##                   "sensor_index":0,
-##                   "strut_address":(3,17),
-##                   "ball_index":0,
-##                   "emitter_index":0} )
 sensor_queue.put( {"type":"couple",
                    "hub_address":(42,2),
                    "socket_index":0,
@@ -46,8 +39,22 @@ sensor_queue.put( {"type":"couple",
                    "ball_index":0,
                    "emitter_index":1} )
 sensor_queue.put( {"type":"couple",
-                   "hub_address":(88,1),
+                   "hub_address":(42,2),
                    "socket_index":0,
+                   "sensor_index":2,
+                   "strut_address":(3,17),
+                   "ball_index":0,
+                   "emitter_index":3} )
+sensor_queue.put( {"type":"couple",
+                   "hub_address":(42,2),
+                   "socket_index":0,
+                   "sensor_index":0,
+                   "strut_address":(3,17),
+                   "ball_index":0,
+                   "emitter_index":0} )
+sensor_queue.put( {"type":"couple",
+                   "hub_address":(88,1),
+                   "socket_index":1,
                    "sensor_index":3,
                    "strut_address":(3,17),
                    "ball_index":1,

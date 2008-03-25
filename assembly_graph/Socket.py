@@ -105,7 +105,7 @@ class Socket( Child ):
             self.out_transform = None
             return
 
-        # build transform for rotation from ball to socket
+        # build transform for rotation from socket to ball
         rotation = Matrix3()
 
         # generate heading, axis and angle
@@ -119,8 +119,14 @@ class Socket( Child ):
             
         rotation.rotate( self.current_coords[2], self.UP )
         
+        # build out transform
+        self.out_transform = Matrix3( self._transform )
+
+        # apply inverse ball rotation to base transform to rotate back to ball
+        self.out_transform.transform( rotation )
+
         # build in transform
-        self.in_transform = Matrix3( rotation )
+        self.in_transform = Matrix3( rotation.invert() )
 
         # rotate 180 degrees around x axis to face in
         self.in_transform.rotate( 180, self.X )
@@ -128,9 +134,4 @@ class Socket( Child ):
         # apply inverted base matrix to move to parent origin
         self.in_transform.transform( Matrix3(self._transform).invert() )
         
-        # build out transform
-        self.out_transform = Matrix3( self._transform )
-
-        # apply inverse ball rotation to base transform to rotate back to ball
-        self.out_transform.transform( rotation.invert() )
 

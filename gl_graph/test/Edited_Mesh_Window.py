@@ -1,6 +1,6 @@
 import gtk
 
-from OpenGL.GL import glRotate
+from OpenGL.GL import glTranslate, glRotate, glPushMatrix, glPopMatrix
 from OpenGL.GLU import gluCylinder, gluNewQuadric
 
 from pyposey.gl_graph.Gimpy_Camera import Gimpy_Camera
@@ -45,14 +45,22 @@ class Edited_Mesh_Window( gtk.Window ):
             
             # draw axes
             if self.axes:
+                glPushMatrix()
                 quadratic = gluNewQuadric()
-                glRotate( 90.0, 0.0, 1.0, 0.0 )
+
+                # long cone is default axis
+                gluCylinder( quadratic, 30.0, 10.0, 140.0, 32, 32 )
+
+                # short cone rotated 90 degrees
+                glTranslate( 30.0, 0.0, 0.0 )
+                glRotate( 90.0, 1.0, 0.0, 0.0 )
                 gluCylinder( quadratic, 30.0, 10.0, 71.5, 32, 32 )
-                glRotate( -90.0, 0.0, 1.0, 0.0 )
-                gluCylinder( quadratic, 30.0, 10.0, 71.5, 32, 32 )
-                glRotate( -90.0, 0.0, 1.0, 0.0 )
-                gluCylinder( quadratic, 30.0, 10.0, 71.5, 32, 32 )
-                glRotate( -90.0, 0.0, 1.0, 0.0 )
+
+                #glRotate( -90.0, 0.0, 1.0, 0.0 )
+                #glRotate( -90.0, 0.0, 1.0, 0.0 )
+                #gluCylinder( quadratic, 30.0, 10.0, 71.5, 32, 32 )
+                #glRotate( -90.0, 0.0, 1.0, 0.0 )
+                glPopMatrix()
             
             # draw mesh
             self.mesh.draw()

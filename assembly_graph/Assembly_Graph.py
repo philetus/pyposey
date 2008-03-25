@@ -6,9 +6,10 @@ from Graph_Visitor import Graph_Visitor
 class Assembly_Graph( Thread ):
     """pulls assembly events from queue and builds graph
     """
-    LOG = Log( name='pyflexy.assembly_graph.Assembly_Graph', level=Log.INFO )
+    LOG = Log( name='pyposey.assembly_graph.Assembly_Graph', level=Log.INFO )
 
-    EVENTS = set([ "create", "destroy", "connect", "disconnect", "configure" ])
+    EVENTS = set([ "create", "destroy", "connect", "disconnect",
+                   "configure", "up" ])
 
     def __init__( self, event_queue, part_library, orient=False ):
         Thread.__init__( self )
@@ -138,11 +139,13 @@ class Assembly_Graph( Thread ):
         hub = self.parts[hub_address]
         socket = hub[socket_index]
 
-        # if ball or socket is already connected disconnect it first
+        # if socket is already connected disconnect it first
         if socket.connected is not None:
             self.LOG.warn( "%s forced to disconnect from %s!"
                            % (str(socket), str(socket.connected)) )
             self._disconnect({ "hub":hub.address, "socket":socket.index })
+
+        # if ball is already connected disconnect it first
         if strut_address in self.parts:
             ball = self.parts[strut_address][ball_index]
             if ball.connected is not None:
@@ -156,10 +159,15 @@ class Assembly_Graph( Thread ):
                 # to anything destroy it
                 if len( h.get_connected() ) < 1:
                     self._destroy({ "hub":h.address })
-            
+    
+        #WTF???
+        if hub.subgraph is None:
+            self.LOG.error( "hub %s has no subgraph!" % str(hub) )
+            return
+                
         # if strut doesn't exist create it and add it to hub's subgraph
         strut = None
-        if not self.parts.has_key( strut_address ):
+        if strut_address not in self.parts:
             strut = self.part_library[strut_address]
             self.parts[strut_address] = strut
             hub.subgraph.add( strut )
@@ -172,6 +180,7 @@ class Assembly_Graph( Thread ):
             # to strut's
             if strut.subgraph is not hub.subgraph:
                 deadgraph = hub.subgraph
+
                 while len( deadgraph ) > 0:
                     part = deadgraph.pop()
                     strut.subgraph.add( part )
@@ -261,4 +270,18 @@ class Assembly_Graph( Thread ):
         # if socket not connected, connect it
         if socket.connected is None:
             self._connect( event )
+
+    def _up( self, event ):
+        """change direction of hub's up vector
+        """
+        # get hub, if there is no hub just return
+        hub_address = event["hub"]
+        if hub_address not in self.parts:
+            return
+        hub = self.parts[hub_address]
+
+        # set up vector
+        hub.set_up( event["x"], event["y"], event["z"] )
+        
+        
         

@@ -1,10 +1,15 @@
 from time import time
+from l33tC4D.vector.Vector3 import Vector3
 from pyposey.util.Log import Log
 
 class Hub_Snitch( object ):
     """interprets events from one hub and tracks hub state
     """
     LOG = Log( name='pyflexy.hardware_demon.Hub_Snitch', level=Log.INFO )
+    ACCEL_ZERO = 508
+    ACCEL_G = -100.0
+    UP_EPSILON = 15.0
+    UPS = 5
 
     def __init__( self, index=None, queue=None,
                   couple_map=None, snitches=None, probates=None ):
@@ -16,9 +21,18 @@ class Hub_Snitch( object ):
         self.snitches = snitches # list of snitches to remove self from
         self.probates = probates
 
+        self.up_values = [ (0.0, 0.0, 1.0) for i in range(self.UPS) ]
+        self.last_up = Vector3( (0.0, 0.0, 1.0) )
+        
+
     def interpret( self, event ):
         """takes couple event, updates hub state and generates assembly event        
-        """ 
+        """
+        # if this is an accelerometer event just generate an up event
+        if event["type"] == "accelerometer":
+            self._handle_up( event )
+            return
+            
         # if socket doesn't already exist make new socket or fail
         if not self.sockets.has_key( event["socket_index"] ):
             if not self._make_socket( event ):
@@ -57,6 +71,33 @@ class Hub_Snitch( object ):
         # otherwise recalculate socket angles and send configure event
         else:
             self._calculate_angle( event )
+
+    def _handle_up( self, event ):
+        """update running average of up values, trigger event on change
+        """
+        # normalize raw values to 1.0 ~= g
+        x = (event["x"] - self.ACCEL_ZERO) / self.ACCEL_G
+        y = (event["y"] - self.ACCEL_ZERO) / -self.ACCEL_G # y is backwards?
+        z = (event["z"] - self.ACCEL_ZERO) / self.ACCEL_G
+
+        # add new up values on end
+        self.up_values.append( (x, y, z) )
+        self.up_values.pop( 0 )
+        
+        # calculate new average
+        new_up = Vector3([ sum(z) / self.UPS for z in zip(*self.up_values) ])
+
+        # if change is smaller than epsilon just return
+        if self.last_up.angle_to( new_up ) < self.UP_EPSILON:
+            return
+
+        self.last_up = new_up
+        self.queue.put( {"type":"up",
+             "hub":event["hub_address"],
+             "x":new_up[0],
+             "y":new_up[1],
+             "z":new_up[2]
+            } )
 
     def _is_zero_couple( self, event ):
         """return true if strut index is all zeros signifying disconnect

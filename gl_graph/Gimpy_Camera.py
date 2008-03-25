@@ -33,7 +33,7 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
         self.height = 1
 
         # for rotating view
-        self.rotation = [ 0, 0, 0 ]
+        self.rotation = 0.0
 
         # flag to track pointer up or down
         self.pointer_down = False
@@ -182,14 +182,13 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
            by default rotates view in x-y, override to change
         """
         if self.pointer_down:
-            self.rotation[0] = x
-            self.rotation[1] = y
+            self.rotation = x
             self.queue_draw()
 
     def handle_press( self, x, y ):
         """do something when pointer button is pressed
         """
-        print "button pressed at %d, %d" % (x, y)
+        print "button presse at %d, %d" % (x, y)
         print self.select( x, y )
 
     def handle_release( self, x, y ):
@@ -251,9 +250,11 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
         gluLookAt( *self.focus )
         glTranslatef( *self.eye )
 
-        glRotatef( self.rotation[0], 0.0, 1.0, 0.0 )
-        glRotatef( self.rotation[1], 1.0, 0.0, 0.0 )
-        glRotatef( self.rotation[2], 0.0, 0.0, 1.0 )
+        # rotate coord frame so +z is up and +x is right
+        glRotatef( -90.0, 1.0, 0.0, 0.0 )
+
+        # rotate around z axis with mouse x
+        glRotatef( self.rotation, 0.0, 0.0, 1.0 )
             
     ###
     ### private functions to map gtk events to canvas handlers

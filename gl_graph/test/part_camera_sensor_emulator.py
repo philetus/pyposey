@@ -1,7 +1,6 @@
+from time import sleep
 import gtk
 from Queue import Queue
-from pyposey.hardware_demon.Sensor_Demon import Sensor_Demon
-from pyposey.hardware_demon.Assembly_Demon import Assembly_Demon
 from pyposey.assembly_graph.Part_Library import Part_Library
 from pyposey.assembly_graph.Assembly_Graph import Assembly_Graph
 from pyposey.gl_graph.Gimpy_Graph_Window import Gimpy_Graph_Window
@@ -21,15 +20,28 @@ for mesh in Mesh_Library( filename="part_mesh_library.xml" ):
 for part in part_library:
     part.set_mesh( meshes[part.type] )
 
-# set up assembly graph
-sensor_queue = Queue()
-assembly_queue = Queue()
+# make queues
+event_queue = Queue()
 
-sensor_demon = Sensor_Demon( sensor_queue, serial_port="/dev/ttyUSB0" )
-assembly_demon = Assembly_Demon( sensor_queue, assembly_queue )
-assembly_graph = Assembly_Graph( event_queue=assembly_queue,
+# build demons
+assembly_graph = Assembly_Graph( event_queue=event_queue,
                                  part_library=part_library,
                                  orient=True )
+
+# put some hardware events on sensor queue
+event_queue.put( {"type":"create",
+                  "hub":(69, 9)} )
+event_queue.put( {"type":"connect",
+                  "hub":(69, 9),
+                  "socket":0,
+                  "strut":( 3, 17 ),
+                  "ball":0 } )
+event_queue.put( {"type":"configure",
+                  "hub":(69,9),
+                  "socket":0,
+                  "strut":(3, 17),
+                  "ball":0,
+                  "coords":( (60, 90, 90), )} )
 
 # make graph window
 gtk.gdk.threads_init()
@@ -40,9 +52,7 @@ window = Gimpy_Graph_Window( assembly_graph )
 window.camera.eye = ( 0, 0, -600 )
 window.camera.zoom = 3.0
 
-# start demon threads
-sensor_demon.start()
-assembly_demon.start()
+# start demons
 assembly_graph.start()
 
 # show window and start gtk mainloop

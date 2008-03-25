@@ -5,7 +5,7 @@ from Edited_Mesh_Window import Edited_Mesh_Window
 from pyposey.gl_graph.STL_Mesh import STL_Mesh
 
 # load files for mesh
-stl_file = open( path.join("meshes", "graphics_one_hub.stl"), "r" )
+stl_file = open( path.join("meshes", "graphics_two_hub.stl"), "r" )
 
 thumbnail_file = open( path.join("meshes", "graphics_four_hub_thumbnail.png"), "rb" )
 

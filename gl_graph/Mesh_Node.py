@@ -36,9 +36,6 @@ class Mesh_Node( object ):
         # translate with node orientation matrix
         glMultMatrixf( self.orientation.gl )
         
-        # rotate 90 degrees around y axis
-        glRotatef( 90.0, 0.0, 1.0, 0.0 )
-
         # flip mesh
         flip_angle = (360 / self.mesh.flips) * self.flip_count
         glRotatef( flip_angle, *self.mesh.flip_axis )
