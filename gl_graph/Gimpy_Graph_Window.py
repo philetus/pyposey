@@ -10,7 +10,7 @@ class Gimpy_Graph_Window( gtk.Window ):
        uses gl graph visitor to walk assembly graph and render it to a
        gimpy camera opengl widget
     """
-    LOG = Log( name='pyposey.gl_graph.Gimpy_Graph_Window', level=Log.DEBUG )
+    LOG = Log( name='pyposey.gl_graph.Gimpy_Graph_Window', level=Log.INFO )
 
     def __init__( self, assembly_graph, title="gimpy graph window",
                   size=(800, 600) ):
@@ -99,16 +99,20 @@ class Gimpy_Graph_Window( gtk.Window ):
         """
         # only do stuff when we are dragging
         if self.camera.pointer_down:
+            redraw = False
             
             if 65505 in self.keyset: # 65505 -> <lshift>
                 self.camera.rotation = x
-                self.redraw()
+                redraw = True
 
             if 65507 in self.keyset: # 65507 -> <ctrl>
-                self.camera.zoom = ( self.zoom_anchor[0] +
-                                     (self.zoom_anchor[1] - y) / 100.0 )
+                zoom = self.zoom_anchor[0] + ((self.zoom_anchor[1] - y) / 100.0)
+                self.camera.zoom = max( zoom, 0.1 )
                 self.LOG.debug( "new zoom: %.1f %d"
                                 % (self.camera.zoom, y) )
+                redraw = True
+
+            if redraw:
                 self.redraw()
 
     def handle_press( self, x, y ):
