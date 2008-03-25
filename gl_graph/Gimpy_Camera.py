@@ -3,12 +3,14 @@ import gtk.gtkgl
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
+from pyposey.util.Log import Log
 
 class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
     """gimp toolkit opengl drawing area widget with hooks for event callbacks
 
        queue_draw() adds redraw request to event queue
     """
+    LOG = Log( name='pyposey.gl_graph.Gimpy_Camera', level=Log.DEBUG )
 
     def __init__( self ):
         # call superclass constructor
@@ -179,8 +181,9 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
     def handle_motion( self, x, y ):
         """do something when mouse pointer is moved
 
-           by default rotates view in x-y, override to change
+           hold space to rotate around z, ctrl to zoom
         """
+        # only do stuff when we are dragging
         if self.pointer_down:
             self.rotation = x
             self.queue_draw()
@@ -188,8 +191,7 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
     def handle_press( self, x, y ):
         """do something when pointer button is pressed
         """
-        print "button presse at %d, %d" % (x, y)
-        print self.select( x, y )
+        self.LOG.debug( "button pressed at %d, %d" % (x, y) )
 
     def handle_release( self, x, y ):
         """do something when pointer button is released
@@ -335,7 +337,7 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
         return True
 
     def _on_motion( self, drawing_area, event ):
-        self.handle_motion( event.x, event.y )
+        self.handle_motion( event.x, self.height - event.y )
 
     def _on_press( self, drawing_area, event ):
         self.pointer_down = True
@@ -343,7 +345,7 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
 
     def _on_release( self, drawing_area, event ):
         self.pointer_down = False
-        self.handle_release( event.x, event.y )
+        self.handle_release( event.x, self.height - event.y )
 
     def _unthread_wrap( self, handler ):
         """wrap handlers to not automatically enter gtk thread lock

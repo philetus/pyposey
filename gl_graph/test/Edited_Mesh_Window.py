@@ -25,14 +25,14 @@ class Edited_Mesh_Window( gtk.Window ):
         # ???
         self.set_reallocate_redraws( True )
 
-        # connect destroy event
-        self.connect( "destroy", self._on_quit )
-
         # add gtk opengl draw area widget to window      
         self.camera = Gimpy_Camera()        
         self.add( self.camera )
 
         self.camera.zoom = zoom
+
+        # connect events
+        self.connect( "destroy", self._on_quit )
         
         # connect camera handlers to local methods
         self.camera.handle_draw = self.handle_draw

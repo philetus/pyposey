@@ -41,6 +41,18 @@ event_queue.put( {"type":"configure",
                   "socket":0,
                   "strut":(3, 17),
                   "ball":0,
+                  "coords":( (60, 0, 0), )} )
+event_queue.put( {"type":"configure",
+                  "hub":(69,9),
+                  "socket":0,
+                  "strut":(3, 17),
+                  "ball":0,
+                  "coords":( (60, 90, 0), )} )
+event_queue.put( {"type":"configure",
+                  "hub":(69,9),
+                  "socket":0,
+                  "strut":(3, 17),
+                  "ball":0,
                   "coords":( (60, 90, 90), )} )
 
 # make graph window

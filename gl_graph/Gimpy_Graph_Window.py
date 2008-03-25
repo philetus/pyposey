@@ -1,4 +1,5 @@
 import gtk
+from pyposey.util.Log import Log
 from Gimpy_Camera import Gimpy_Camera
 
 class Gimpy_Graph_Window( gtk.Window ):
@@ -9,6 +10,7 @@ class Gimpy_Graph_Window( gtk.Window ):
        uses gl graph visitor to walk assembly graph and render it to a
        gimpy camera opengl widget
     """
+    LOG = Log( name='pyposey.gl_graph.Gimpy_Graph_Window', level=Log.DEBUG )
 
     def __init__( self, assembly_graph, title="gimpy graph window",
                   size=(800, 600) ):
@@ -24,16 +26,27 @@ class Gimpy_Graph_Window( gtk.Window ):
         # ???
         self.set_reallocate_redraws( True )
 
-        # connect destroy event
-        self.connect( "destroy", self._on_quit )
-
         # add gtk opengl draw area widget to window      
         self.camera = Gimpy_Camera()        
         self.add( self.camera )
+
+        # connect events
+        self.set_events( gtk.gdk.KEY_RELEASE_MASK |
+                         gtk.gdk.KEY_PRESS_MASK )
+        self.connect( "key_press_event", self._on_key_press )
+        self.connect( "key_release_event", self._on_key_release )
+        self.connect( "destroy", self._on_quit )
         
+        # tracks currently pressed keys
+        self.keyset = set()
+
+        # anchor coords for mouse zoom
+        self.zoom_anchor = (1.0, 0) # zoom, y coord
+
         # connect camera handlers to local methods
         self.camera.handle_draw = self.handle_draw
         self.camera.handle_press = self.handle_press
+        self.camera.handle_motion = self.handle_motion
 
         # add redraw call to assembly graph observer methods
         self.graph.observers.append( self._on_graph_event )
@@ -79,12 +92,35 @@ class Gimpy_Graph_Window( gtk.Window ):
             self.selected = node
             node.selected = True
 
-    def handle_press( self, x, y ):
-        # select top node under pointer
-        self._select_node( x, y )
+    def handle_motion( self, x, y ):
+        """do something when mouse pointer is moved
 
-        # redraw window
-        self.redraw()
+           hold space to rotate around z, ctrl to zoom
+        """
+        # only do stuff when we are dragging
+        if self.camera.pointer_down:
+            
+            if 65505 in self.keyset: # 65505 -> <lshift>
+                self.camera.rotation = x
+                self.redraw()
+
+            if 65507 in self.keyset: # 65507 -> <ctrl>
+                self.camera.zoom = ( self.zoom_anchor[0] +
+                                     (self.zoom_anchor[1] - y) / 100.0 )
+                self.LOG.debug( "new zoom: %.1f %d"
+                                % (self.camera.zoom, y) )
+                self.redraw()
+
+    def handle_press( self, x, y ):
+        # if no keys are pressed select graph node under pointer
+        if not self.keyset:
+            self._select_node( x, y )
+            self.redraw()
+
+        # if <ctrl> is pressed set anchor position for zoom
+        elif 65507 in self.keyset:
+            self.zoom_anchor = (self.camera.zoom, y)
+            self.LOG.debug( "zoom anchored at: %.1f %d" % self.zoom_anchor )
         
     def redraw( self ):
         """add a redraw request to opengl widget event queue
@@ -97,4 +133,17 @@ class Gimpy_Graph_Window( gtk.Window ):
 
     def _on_graph_event( self, event ):
         self.redraw()
-        
+
+    def _on_key_press( self, widget, event ):
+        self.keyset.add( event.keyval )
+        self.LOG.debug( "key pressed: '%s' <%d>"
+                        % (event.string, event.keyval) )
+        return True
+
+    def _on_key_release( self, widget, event ):
+        self.keyset.discard( event.keyval )
+        self.LOG.debug( "key released: '%s' <%d>"
+                        % (event.string, event.keyval) )
+        return True
+
+
