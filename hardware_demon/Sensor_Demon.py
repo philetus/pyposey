@@ -8,26 +8,40 @@ from pyposey.util.Log import Log
 class Sensor_Demon( Thread ):
     """monitors serial xml stream and places couple events on sensor queue
 
-       puts dict objects on sensor queue with this format:
+       puts dict objects on sensor queue with these formats:
        {
-           type:            "couple"
+           type:             "couple"
            
-           hub_address:     (<high_byte>, <low_byte>)
-           socket_index:    <0-3>
-           sensor_index:    <0-3>
+           hub_address:      (<high_byte>, <low_byte>)
+           socket_index:     <0-3>
 
-           strut_address:   (<high_byte>, <low_byte>)
-           ball_index:      <0-1>
-           emitter_index:   <0-10>
+           strut_address:    (<high_byte>, <low_byte>) | None
+           ball_index:       <0-1 | None>
+
+           coupled_emitters: ( <0-10 | None>, <0-10 | None>,
+                               <0-10 | None>, <0-10 | None> )
+       }
+
+       {
+           type:             "accelerometer"
+
+           hub_address:      (<high_byte>, <low_byte>)
+           x:                <0-1024>
+           y:                <0-1024>
+           z:                <0-1024>
        }
            
     """
-    LOG = Log( name='pyflexy.hardware_demon.Sensor_Demon', level=Log.WARN )
+    LOG = Log( name='pyposey.hardware_demon.Sensor_Demon', level=Log.INFO )
     
     TAG_PATTERN = re.compile( r'<([^<>]+)/>' )
-    CONNECT_PATTERN = re.compile(
-        r'connect_event\s+hub_address="([^"]+)"\s+'
-        + r'strut_address="([^"]+)"\s+',
+    SOCKET_PATTERN = re.compile(
+        r'socket_event\s+hub_address="([^"]+)"\s+'
+        + r'socket="([^"]+)"\s+'
+        + r'0="([^"]+)"\s+'
+        + r'1="([^"]+)"\s+'
+        + r'2="([^"]+)"\s+'
+        + r'3="([^"]+)"\s+',
         re.I )
     ACCELEROMETER_PATTERN = re.compile(
         r'accelerometer_value\s+'
@@ -116,33 +130,71 @@ class Sensor_Demon( Thread ):
         """parse event from contents of xml tag
         """
         # check if this is a connect event
-        match = self.CONNECT_PATTERN.match( contents )
+        match = self.SOCKET_PATTERN.match( contents )
         if match is not None:
-            
+
+            # read hub and socket
+            hub_address = self._parse_tuple( match.group(1) )
+            socket = int( match.group(2) )
+
+            # parse addresses and emitters
+            strut_addresses = []
+            emitters = []
+            for i in range( 3, 7 ):
+                raw = self._parse_tuple(match.group(i))
+                address = raw[0], raw[1], raw[2] / self.EMITTERS
+                emitter = raw[2] % self.EMITTERS
+                if address[:2] == (0, 0):
+                    strut_addresses.append( None )
+                    emitters.append( None )
+                else:
+                    strut_addresses.append( address )
+                    emitters.append( emitter )
+
+            # check that all addresses that aren't none are the same
+            address = None
+            for a in strut_addresses:
+                if a is not None:
+                    if address is None:
+                        address = a
+                    else:
+                        if a != address:
+                            self.LOG.error(
+                                "hub %s socket %d connected to multiple balls!"
+                                % (str(hub_address), socket) )
+                            raise ValueError()
+                
             # create new couple event dict
             event = { "type":"couple" }
             
             # read hub data into couple event
-            raw = self._parse_tuple( match.group(1) )
-            event["hub_address"] = raw[:-1]
-            event["socket_index"] = raw[-1] / self.SENSORS
-            event["sensor_index"] = raw[-1] % self.SENSORS
+            strut_address = (address[:2] if address is not None else None)
+            ball = (address[2] if address is not None else None)
+            event["hub_address"] = hub_address
+            event["socket_index"] = socket
+            event["strut_address"] = strut_address
+            event["ball_index"] = ball
+            event["coupled_emitters"] = tuple(emitters)
 
-            # read strut data into couple event
-            raw = self._parse_tuple( match.group(2) )
-            event["strut_address"] = raw[:-1]
-            event["ball_index"] = raw[-1] / self.EMITTERS
-            event["emitter_index"] = raw[-1] % self.EMITTERS
-
-            self.LOG.info( "<%d.%d.%d.%d %d.%d.%d.%d>"
-                            % (event["hub_address"][0],
-                               event["hub_address"][1],
-                               event["socket_index"],
-                               event["sensor_index"],
-                               event["strut_address"][0],
-                               event["strut_address"][1],
-                               event["ball_index"],
-                               event["emitter_index"]) )
+            if strut_address is None:
+                self.LOG.info( "<%d.%d.%d x>"
+                               % (event["hub_address"][0],
+                                  event["hub_address"][1],
+                                  event["socket_index"]) )
+            else:
+                emitlog = [ (str(v) if v is not None else "x")
+                            for v in event["coupled_emitters"] ]
+                self.LOG.info( "<%d.%d.%d %d.%d.%d %s %s %s %s>"
+                               % (event["hub_address"][0],
+                                  event["hub_address"][1],
+                                  event["socket_index"],
+                                  event["strut_address"][0],
+                                  event["strut_address"][1],
+                                  event["ball_index"],
+                                  emitlog[0],
+                                  emitlog[1],
+                                  emitlog[2],
+                                  emitlog[3]) )
 
             self.sensor_queue.put( event )
             return

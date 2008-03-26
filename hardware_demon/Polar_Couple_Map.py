@@ -10,14 +10,12 @@ from Map_Socket import Map_Socket
 class Polar_Couple_Map:
     """
     """
-    LOG = Log( name='pyposey.hardware_demon.Couple_Map', level=Log.DEBUG )
-
+    LOG = Log( name='pyposey.hardware_demon.Polar_Couple_Map', level=Log.DEBUG )
+    
     def __init__( self, step=10, filename="couples.map" ):
         self.step = step
         self.nodes = {}
         self.couples = {}
-
-        
 
         print "map[",
 
@@ -39,6 +37,8 @@ class Polar_Couple_Map:
         if len( couples ) < 1:
             return set()
         
+        self.LOG.info( "couples: %s" % str(couples) )
+        
         visible = set( couples )
         not_visible = set( self.couples.keys() ) - visible
 
@@ -50,7 +50,7 @@ class Polar_Couple_Map:
 
             # if intersection would remove all members of set reject it
             if len( new ) < 1:
-                self.LOG.info( "rejecting seen couple %s!" % str(couple) )
+                self.LOG.warn( "rejecting seen couple %s!" % str(couple) )
                 
             else:
                 possible = new
@@ -62,16 +62,17 @@ class Polar_Couple_Map:
 
             # if subtraction would reduce all members of set reject it
             if len( new ) < 1:
-                self.LOG.info( "rejecting unseen couple %s" % str(couple) )
+                self.LOG.warn( "rejecting unseen couple %s" % str(couple) )
             else:
                 possible = new
                 
         return tuple( possible )
     
     def _build_map( self ):
-        nuetral = Polar_Vector3().set_heading( 0, 0 )
-        
-        #print "nuetral:", str(nuetral)
+        up = Polar_Vector3().set_heading( 0, 0 )
+
+        # matrix to rotate one step
+        rotate_step = Matrix3().rotate( self.step, up )
         
         map_ball = Map_Ball()
         map_socket = Map_Socket( map_ball )
@@ -88,43 +89,36 @@ class Polar_Couple_Map:
 
             for lon in range( 0, 360, lon_step ):
 
-                print ">",
+                #print "<%d %d>" % (lat, lon),
+                print "\n"
 
-                # matrix to rotate a step around heading
-                rotate_by_heading = None
+                # matrix to transform to map position
+                transform = None
 
-                # if latitude is zero we are already at heading
+                # if lat is 0 we are already at heading
                 if lat == 0:
-                    rotate_by_heading = Matrix3().rotate( self.step, nuetral )
+                    transform = Matrix3()
 
-                # otherwise move to heading and set up matrix to rotate a step
-                # around heading
+                # otherwise generate transform to move to heading
                 else:
                     
                     # generate heading and axis of rotation
                     heading = Polar_Vector3().set_heading( lat, lon )
-                    
-                    #print "lat, lon, heading:", str(lat), str(lon), str(heading)
-                    
-                    axis = Polar_Vector3( heading ).cross( nuetral )
+                    axis = Polar_Vector3( heading ).cross( up )
+                    angle = up.angle_to( heading )
 
-                    #print "axis:", str(axis)
+                    # build transform to map heading
+                    transform = Matrix3().rotate( angle, axis )
 
-                    angle = nuetral.angle_to( heading )
-
-                    rotate_to_heading = Matrix3().rotate( angle, axis )
-
-                    # transform map ball to heading
-                    map_ball.reset()
-                    map_ball.transform( rotate_to_heading )
-
-                    # matrix to rotate around heading
-                    rotate_by_heading = Matrix3().rotate( self.step, heading )
+                # transform map ball to heading
+                map_ball.reset()
+                map_ball.transform( transform )
 
                 # add key for each rotation
                 for rot in range( 0, 360, self.step ):
 
                     #print ".",
+                    print "<%d %d %d>" % (lat, lon, rot),
 
                     # get angle from each sensor to each emitter
                     couples = map_socket.get_couples()
@@ -139,7 +133,9 @@ class Polar_Couple_Map:
                         self.couples[couple].add( (lat, lon, rot) )
 
                     # rotate one step around heading
-                    map_ball.transform( rotate_by_heading )
+                    transform.transform( rotate_step )
+                    map_ball.reset()
+                    map_ball.transform( transform )
 
     def _load_map( self, filename ):
         """load couple map from binary file

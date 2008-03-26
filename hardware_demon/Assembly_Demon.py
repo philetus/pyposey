@@ -83,42 +83,24 @@ class Assembly_Demon( Thread ):
         # generate couple map
         self.couple_map = Polar_Couple_Map()
 
-        # sockets waiting to be disconnected
-        self.probates = {}
-        
     def run( self ):
         """read events from sensor queue and farm them to hub demons
         """        
         while( self.sensor_queue and self.assembly_queue ):
-            try:
-                # block until an event is read from sensor queue
-                event = self.sensor_queue.get( timeout=0.5 )
-                self.LOG.debug( "got sensor event %s" % str(event) )
-                index = event["hub_address"]
+            
+            # block until an event is read from sensor queue
+            event = self.sensor_queue.get()
+            self.LOG.debug( "got sensor event %s" % str(event) )
+            index = event["hub_address"]
 
-                # if snitch doesn't exist create it
-                if not self._snitches.has_key( index ):
-                    snitch = Hub_Snitch( index=index,
-                                         queue=self.assembly_queue,
-                                         couple_map=self.couple_map,
-                                         snitches=self._snitches,
-                                         probates=self.probates )
-                    self._snitches[index] = snitch
+            # if snitch doesn't exist create it
+            if not self._snitches.has_key( index ):
+                snitch = Hub_Snitch( index=index,
+                                     queue=self.assembly_queue,
+                                     couple_map=self.couple_map )
+                self._snitches[index] = snitch
 
-                # assign appropriate snitch to interpret event
-                self._snitches[index].interpret( event )
-
-            # use empty to break out of queue get
-            except Empty:
-                pass
-
-            # check on probates
-            now = time()
-            keys = self.probates.keys()
-            for key in keys:
-                stamp = self.probates[key]
-                hub_index, socket_index = key
-                if now - stamp > self.TIMEOUT:
-                    self._snitches[hub_index].remove_socket( socket_index )
+            # assign appropriate snitch to interpret event
+            self._snitches[index].interpret( event )
                     
         self.LOG.debug( "no queue?" )

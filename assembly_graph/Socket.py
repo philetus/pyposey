@@ -9,6 +9,7 @@ class Socket( Child ):
 
     LOG = Log( name='pyposey.assembly_graph.Socket', level=Log.INFO )
     EPSILON = 0.1
+    FAVORED_RADIUS = 20.0 # favor new coords at this distance over closer coords
     UP = Polar_Vector3().set_heading( 0, 0 )
     X = Polar_Vector3( (1, 0, 0) )
 
@@ -70,6 +71,9 @@ class Socket( Child ):
         # if there is only one possible coord just set it
         if len(self.coords) < 2:
             self.current_coords = self.coords[0]
+            self.LOG.info( "%s set new forced coords %s"
+                           % (str(self), str(self.current_coords)) )
+            return
 
         # otherwise build dictionary of coords by distance from current coord
         # and pick closest coords
@@ -77,26 +81,32 @@ class Socket( Child ):
         rotation = self.current_coords[2]
         distances = {}
         new_heading = Polar_Vector3()
+
+        self.LOG.debug( "calculating distances from coords %s:"
+                        % str(self.current_coords) )
+        
         for coords in self.coords:
 
             # get distance to new heading
             new_heading.set_heading( *coords[:2] )
             distance = heading.angle_to( new_heading )
-
+            
             # add distance between rotations
             rot_distance = abs( rotation - coords[2] )
             if rot_distance > 180.0:
                 rot_distance = 360.0 - rot_distance
             distance += rot_distance
 
-            # add coords to dict by distance
-            distances[distance] = coords
+            # add coords to dict by distance, favor some movement
+            distances[abs(distance - self.FAVORED_RADIUS)] = (distance, coords)
 
-        # set coord with min distance as new coord
-        min_distance = min(distances)
-        self.current_coords = distances[min_distance]
+            self.LOG.debug( "\t%.1f to coords %s" % (distance, str(coords)) )
+
+        # set coord with min favored distance as new coord
+        min_favored_distance = min(distances)
+        min_distance, self.current_coords = distances[min_favored_distance]
         
-        self.LOG.info( "%s picked new coord %s at distance %.1f"
+        self.LOG.info( "%s picked new coords %s at distance %.1f"
                        % (str(self), str(self.current_coords), min_distance) )
         
     def _build_transforms( self ):

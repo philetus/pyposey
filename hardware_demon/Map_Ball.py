@@ -10,11 +10,11 @@ class Map_Ball:
         (63.4, 288.0),      # 3
         (63.4, 216.0),      # 4
         (63.4, 144.0),      # 5
-        (126.8, 108.0),     # 6
-        (126.8, 180.0),     # 7
-        (126.8, 252.0),     # 8
-        (126.8, 324.0),     # 9
-        (126.8, 36.0) ]     # 10
+        (116.6, 108.0),     # 6
+        (116.6, 180.0),     # 7
+        (116.6, 252.0),     # 8
+        (116.6, 324.0),     # 9
+        (116.6, 36.0) ]     # 10
 
     def __init__( self ):
         """
@@ -36,3 +36,11 @@ class Map_Ball:
         for emitter in self.emitters:
             emitter.transform( matrix3 )
         
+    def test_distances( self ):
+        for i in range(len(self.emitters)):
+            for j in range(len(self.emitters)):
+                if i < j:
+                    angle = self.emitters[i].angle_to( self.emitters[j] )
+                    #if (angle % 63.3) > 0.5:
+                    print "%d-%d: %.1f\t" % (i, j, angle),
+            print ""

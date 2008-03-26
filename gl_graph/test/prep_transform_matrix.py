@@ -32,21 +32,12 @@ def strut_matrices():
 
     return matrices
 
-def four_hub_matrices():
-    matrices = []
-    for i in range( 4 ):
-        matrices.append( Matrix3() )
+def one_hub_matrix():
+    matrix = Matrix3()
 
-    # rotate around x axis
-    for i, m in enumerate( matrices ):
-        m.rotate( i * 90.0, x )
-
-    # translate distance to connector
-    d = Vector3( z ).multiply( 61.0 )
-    for m in matrices:
-        m.translate( d )
-
-    return matrices
+    matrix.rotate( 90.0, y )
+        
+    return matrix
 
 def two_hub_matrices():
     matrices = []
@@ -65,5 +56,22 @@ def two_hub_matrices():
 
     return matrices
 
-for m in strut_matrices():
-    print_matrix( m )
+def four_hub_matrices():
+    matrices = []
+    for i in range( 4 ):
+        matrices.append( Matrix3() )
+
+    # rotate around x axis
+    for i, m in enumerate( matrices ):
+        m.rotate( i * 90.0, x )
+
+    # translate distance to connector
+    d = Vector3( z ).multiply( 61.0 )
+    for m in matrices:
+        m.translate( d )
+
+    return matrices
+
+##for m in strut_matrices():
+##    print_matrix( m )
+print_matrix( one_hub_matrix() )

@@ -30,35 +30,24 @@ assembly_graph = Assembly_Graph( event_queue=event_queue,
                                  part_library=part_library,
                                  orient=True )
 
+
+HUB = (42, 2, 0)
+STRUT = (3, 17, 0)
+def put_couple( sensor, emitter ):
+    strut_address = STRUT[:2]
+    if emitter == None:
+        strut_address = (0, 0)
+    sensor_queue.put( {"type":"couple",
+                       "hub_address":HUB[:2],
+                       "socket_index":HUB[2],
+                       "sensor_index":sensor,
+                       "strut_address":strut_address,
+                       "ball_index":STRUT[2],
+                       "emitter_index":emitter} )
+
 # put some hardware events on sensor queue
-sensor_queue.put( {"type":"couple",
-                   "hub_address":(42,2),
-                   "socket_index":0,
-                   "sensor_index":3,
-                   "strut_address":(3,17),
-                   "ball_index":0,
-                   "emitter_index":1} )
-sensor_queue.put( {"type":"couple",
-                   "hub_address":(42,2),
-                   "socket_index":0,
-                   "sensor_index":2,
-                   "strut_address":(3,17),
-                   "ball_index":0,
-                   "emitter_index":3} )
-sensor_queue.put( {"type":"couple",
-                   "hub_address":(42,2),
-                   "socket_index":0,
-                   "sensor_index":0,
-                   "strut_address":(3,17),
-                   "ball_index":0,
-                   "emitter_index":0} )
-sensor_queue.put( {"type":"couple",
-                   "hub_address":(88,1),
-                   "socket_index":1,
-                   "sensor_index":3,
-                   "strut_address":(3,17),
-                   "ball_index":1,
-                   "emitter_index":1} )
+put_couple( 0, 0 )
+put_couple( 1, 0 )
 
 # make graph window
 gtk.gdk.threads_init()
