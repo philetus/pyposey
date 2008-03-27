@@ -29,26 +29,25 @@ assembly_graph = Assembly_Graph( event_queue=event_queue,
                                  orient=True )
 
 # put some hardware events on sensor queue
+hub0 = (42, 3)
+socket0 = 0
+strut0 = (3, 17)
+ball0 = 0
 event_queue.put( {"type":"create",
-                  "hub":(88, 1)} )
+                  "hub":hub0} )
 event_queue.put( {"type":"connect",
-                  "hub":(88, 1),
-                  "socket":1,
-                  "strut":(3, 17),
-                  "ball":0 } )
-event_queue.put( {"type":"connect",
-                  "hub":(88, 1),
-                  "socket":2,
-                  "strut":(3, 18),
-                  "ball":0 } )
+                  "hub":hub0,
+                  "socket":socket0,
+                  "strut":strut0,
+                  "ball":ball0 } )
 event_queue.put( {"type":"configure",
-                  "hub":(88, 1),
-                  "socket":1,
-                  "strut":(3, 17),
-                  "ball":0,
-                  "coords":( (60, 60, 0), )} )
+                  "hub":hub0,
+                  "socket":socket0,
+                  "strut":strut0,
+                  "ball":ball0,
+                  "coords":( (0, 0, 0), )} )
 event_queue.put( {"type":"up",
-                  "hub":(88, 1),
+                  "hub":hub0,
                   "x":0.5,
                   "y":0.5,
                   "z":0.5} )

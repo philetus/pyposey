@@ -39,7 +39,8 @@ def strut_matrices():
 def one_hub_matrix():
     matrix = Matrix3()
 
-    matrix.rotate( 90.0, y )
+    matrix.rotate( -90.0, y )
+    matrix.rotate( 180, x )
         
     return matrix
 
@@ -97,6 +98,5 @@ def four_hub_matrices():
 
     return matrices
 
-##for m in strut_matrices():
-##    print_matrix( m )
-print_matrices( four_hub_matrices() )
+print_matrix( one_hub_matrix() )
+#print_matrices( four_hub_matrices() )

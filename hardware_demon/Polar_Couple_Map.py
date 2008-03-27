@@ -89,53 +89,60 @@ class Polar_Couple_Map:
 
             for lon in range( 0, 360, lon_step ):
 
-                #print "<%d %d>" % (lat, lon),
-                print "\n"
+                # ignore area covered by grips:
+                #   lat > 45 and 15 < lon < 165
+                #   lat > 45 and 195 < lon < 345
+                if lat > 45 and (( 15 < lon and lon < 165)
+                                 or (195 < lon and lon < 345)):
+                    print "x",
 
-                # matrix to transform to map position
-                transform = None
-
-                # if lat is 0 we are already at heading
-                if lat == 0:
-                    transform = Matrix3()
-
-                # otherwise generate transform to move to heading
                 else:
+                    print ">",
                     
-                    # generate heading and axis of rotation
-                    heading = Polar_Vector3().set_heading( lat, lon )
-                    axis = Polar_Vector3( heading ).cross( up )
-                    angle = up.angle_to( heading )
+                    # matrix to transform to map position
+                    transform = None
 
-                    # build transform to map heading
-                    transform = Matrix3().rotate( angle, axis )
+                    # if lat is 0 we are already at heading
+                    if lat == 0:
+                        transform = Matrix3()
 
-                # transform map ball to heading
-                map_ball.reset()
-                map_ball.transform( transform )
+                    # otherwise generate transform to move to heading
+                    else:
+                        
+                        # generate heading and axis of rotation
+                        heading = Polar_Vector3().set_heading( lat, lon )
+                        angle = up.angle_to( heading )
+                        axis = Polar_Vector3( heading ).cross( up )
 
-                # add key for each rotation
-                for rot in range( 0, 360, self.step ):
+                        # build transform to map heading
+                        transform = Matrix3().rotate( angle, axis )
 
-                    #print ".",
-                    print "<%d %d %d>" % (lat, lon, rot),
-
-                    # get angle from each sensor to each emitter
-                    couples = map_socket.get_couples()
-
-                    # add visible couples to this node
-                    self.nodes[lat, lon, rot] = couples
-
-                    # add node to each visible couple
-                    for couple in couples:
-                        if couple not in self.couples:
-                            self.couples[couple] = set()
-                        self.couples[couple].add( (lat, lon, rot) )
-
-                    # rotate one step around heading
-                    transform.transform( rotate_step )
+                    # transform map ball to heading
                     map_ball.reset()
                     map_ball.transform( transform )
+
+                    # add key for each rotation
+                    for rot in range( 0, 360, self.step ):
+
+                        #print ".",
+                        #print "<%d %d %d>" % (lat, lon, rot),
+
+                        # get angle from each sensor to each emitter
+                        couples = map_socket.get_couples()
+
+                        # add visible couples to this node
+                        self.nodes[lat, lon, rot] = couples
+
+                        # add node to each visible couple
+                        for couple in couples:
+                            if couple not in self.couples:
+                                self.couples[couple] = set()
+                            self.couples[couple].add( (lat, lon, rot) )
+
+                        # rotate one step around heading
+                        transform.transform( rotate_step )
+                        map_ball.reset()
+                        map_ball.transform( transform )
 
     def _load_map( self, filename ):
         """load couple map from binary file
