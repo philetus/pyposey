@@ -6,6 +6,10 @@ def print_matrix( matrix ):
         print "%.3f" % v,
     print "\n"
 
+def print_matrices( matrices ):
+    for matrix in matrices:
+        print "(%s)" % " ".join( "%.3f" % f for f in matrix ),
+
 x = Vector3( (1, 0, 0) )
 y = Vector3( (0, 1, 0) )
 z = Vector3( (0, 0, 1) )
@@ -56,14 +60,35 @@ def two_hub_matrices():
 
     return matrices
 
+def three_hub_matrices():
+    matrices = []
+    for i in range( 3 ):
+        matrices.append( Matrix3() )
+
+    for m in matrices:
+        m.rotate( -90.0, y )
+        
+    matrices[1].rotate( -120.0, x )
+    matrices[2].rotate( -240.0, x )
+
+    # translate distance to connector
+    d = Vector3( z ).multiply( 53.0 )
+    for m in matrices:
+        m.translate( d )
+
+    return matrices
+
 def four_hub_matrices():
     matrices = []
     for i in range( 4 ):
         matrices.append( Matrix3() )
 
+    for m in matrices:
+        m.rotate( -90.0, y )
+        
     # rotate around x axis
     for i, m in enumerate( matrices ):
-        m.rotate( i * 90.0, x )
+        m.rotate( i * -90.0, x )
 
     # translate distance to connector
     d = Vector3( z ).multiply( 61.0 )
@@ -74,4 +99,4 @@ def four_hub_matrices():
 
 ##for m in strut_matrices():
 ##    print_matrix( m )
-print_matrix( one_hub_matrix() )
+print_matrices( four_hub_matrices() )

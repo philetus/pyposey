@@ -30,18 +30,28 @@ assembly_graph = Assembly_Graph( event_queue=event_queue,
 
 # put some hardware events on sensor queue
 event_queue.put( {"type":"create",
-                  "hub":(42, 3)} )
+                  "hub":(88, 1)} )
 event_queue.put( {"type":"connect",
-                  "hub":(42, 3),
-                  "socket":0,
-                  "strut":( 3, 17 ),
+                  "hub":(88, 1),
+                  "socket":1,
+                  "strut":(3, 17),
+                  "ball":0 } )
+event_queue.put( {"type":"connect",
+                  "hub":(88, 1),
+                  "socket":2,
+                  "strut":(3, 18),
                   "ball":0 } )
 event_queue.put( {"type":"configure",
-                  "hub":(42,3),
-                  "socket":0,
+                  "hub":(88, 1),
+                  "socket":1,
                   "strut":(3, 17),
                   "ball":0,
-                  "coords":( (0, 0, 0), )} )
+                  "coords":( (60, 60, 0), )} )
+event_queue.put( {"type":"up",
+                  "hub":(88, 1),
+                  "x":0.5,
+                  "y":0.5,
+                  "z":0.5} )
 
 # make graph window
 gtk.gdk.threads_init()
