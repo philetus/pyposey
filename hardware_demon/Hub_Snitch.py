@@ -5,7 +5,7 @@ from pyposey.util.Log import Log
 class Hub_Snitch( object ):
     """interprets events from one hub and tracks hub state
     """
-    LOG = Log( name='pyflexy.hardware_demon.Hub_Snitch', level=Log.INFO )
+    LOG = Log( name='pyflexy.hardware_demon.Hub_Snitch', level=Log.WARN )
     ACCEL_ZERO = 508
     ACCEL_G = -100.0
     UP_EPSILON = 5.0

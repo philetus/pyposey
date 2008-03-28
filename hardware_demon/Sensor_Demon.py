@@ -32,7 +32,7 @@ class Sensor_Demon( Thread ):
        }
            
     """
-    LOG = Log( name='pyposey.hardware_demon.Sensor_Demon', level=Log.INFO )
+    LOG = Log( name='pyposey.hardware_demon.Sensor_Demon', level=Log.WARN )
     
     TAG_PATTERN = re.compile( r'<([^<>]+)/>' )
     SOCKET_PATTERN = re.compile(
@@ -214,7 +214,7 @@ class Sensor_Demon( Thread ):
             event["y"] = int( match.group(3), 16 )
             event["z"] = int( match.group(4), 16 )
 
-            self.LOG.info( "<%d.%d %d %d %d>" %
+            self.LOG.debug( "<%d.%d %d %d %d>" %
                            (event["hub_address"][0], event["hub_address"][1],
                             event["x"], event["y"], event["z"]) )
 

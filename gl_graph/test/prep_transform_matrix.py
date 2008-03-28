@@ -24,14 +24,16 @@ def strut_matrices():
     # rotate around y axis
     matrices[0].rotate( -90.0, y )
     matrices[1].rotate( 90.0, y )
+        
+    #matrices[1].rotate( 180.0, x )
+    #matrices[1].rotate( 180.0, z )
 
     # translate distance to connector
     d = Vector3( z ).multiply( 71.5 )
     for m in matrices:
         m.translate( d )
 
-    # fix this with mesh editor
-    #matrices[0].rotate( -90.0, z )
+    #matrices[0].rotate( 90.0, z )
     #matrices[1].rotate( 90.0, z )
 
     return matrices
@@ -98,5 +100,5 @@ def four_hub_matrices():
 
     return matrices
 
-print_matrix( one_hub_matrix() )
-#print_matrices( four_hub_matrices() )
+#print_matrix( one_hub_matrix() )
+print_matrices( strut_matrices() )

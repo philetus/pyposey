@@ -6,7 +6,7 @@ from Socket import Socket
 class Hub( Node ):
     """a hub in a graph
     """
-    LOG = Log( name='pyposey.assembly_graph.Hub', level=Log.INFO)
+    LOG = Log( name='pyposey.assembly_graph.Hub', level=Log.WARN)
     
     def __init__( self, address, children, child_class=Socket, **args ):
         # call superclass constructor with args

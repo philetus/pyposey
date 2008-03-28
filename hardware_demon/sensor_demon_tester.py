@@ -20,21 +20,14 @@ accel_bundle = 5
 while queue is not None:
     event = queue.get()
 
-##    # check for connect event
-##    if event["type"] == "couple":
-##        if event["emitter_index"] == 0:
-##            print "<%d.%d.%d.%d" % ( event["hub_address"][0],
-##                                     event["hub_address"][1],
-##                                     event["socket_index"],
-##                                     event["sensor_index"] ),
-##            if event["strut_address"] == (0, 0):
-##                print "x>"
-##            else:
-##                print "%d.%d.%d.%d>" % ( event["strut_address"][0],
-##                                         event["strut_address"][1],
-##                                         event["ball_index"],
-##                                         event["emitter_index"] )
-##
+    # check for connect event
+    if event["type"] == "couple":
+        emitters = list( event["coupled_emitters"] )
+        if 0 in emitters:
+            print "<%d.%d>" % (event["socket_index"], emitters.index(0))
+        else:
+            print "<%d.x>" % event["socket_index"]
+
 ##    elif event["type"] == "accelerometer":
 ##        address = event["hub_address"]
 ##        

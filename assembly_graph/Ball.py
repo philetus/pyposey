@@ -15,7 +15,7 @@ class Ball( Child ):
         return "<ball %d.%d.%d />" % self.address
 
     def build_transforms( self ):
-        """builf matrix to transform from child to parent
+        """build matrix to transform from child to parent
         """
         if self._transform is None:
             self.in_transform = None

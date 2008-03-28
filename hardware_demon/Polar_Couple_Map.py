@@ -10,7 +10,7 @@ from Map_Socket import Map_Socket
 class Polar_Couple_Map:
     """
     """
-    LOG = Log( name='pyposey.hardware_demon.Polar_Couple_Map', level=Log.DEBUG )
+    LOG = Log( name='pyposey.hardware_demon.Polar_Couple_Map', level=Log.WARN )
     
     def __init__( self, step=10, filename="couples.map" ):
         self.step = step
