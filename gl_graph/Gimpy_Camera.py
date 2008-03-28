@@ -67,9 +67,12 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
         gl_context = self.get_gl_context()
         gl_drawable = self.get_gl_drawable()
         assert gl_drawable.gl_begin( gl_context ), \
-               "couldn't gl begin in _on_expose()"
+               "couldn't gl begin in _on_select()"
         
         try:
+            print "selecting"
+            gtk.gdk.threads_leave()
+            
             # set up pick matrix
             glMatrixMode( GL_PROJECTION )
             glLoadIdentity()
@@ -95,6 +98,7 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
             select_buffer = glRenderMode( GL_RENDER )
             
         finally:
+            gtk.gdk.threads_enter()
             gl_drawable.gl_end()
 
         return self._sort_gl_names( select_buffer )
@@ -272,11 +276,15 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
                "couldn't gl begin in _on_realize()"
         
         try:
+            print "realizing"
+            gtk.gdk.threads_leave()
+            
             # call gl init handler
             self.handle_init_gl()
 
         # call gl end
         finally:
+            gtk.gdk.threads_enter()
             gl_drawable.gl_end()
         
     def _on_expose( self, gl_area, event ):
@@ -287,6 +295,9 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
         gl_drawable = self.get_gl_drawable()
         assert gl_drawable.gl_begin( gl_context ), \
                "couldn't gl begin in _on_expose()"
+
+        # ???
+        gtk.gdk.threads_leave()
         
         try:
             
@@ -310,6 +321,7 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
                 
         # call gl end
         finally:
+            gtk.gdk.threads_enter()
             gl_drawable.gl_end()
 
         return True
@@ -320,6 +332,9 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
         gl_drawable = self.get_gl_drawable()
         assert gl_drawable.gl_begin( gl_context ), \
                "couldn't gl begin in _on_configure()"
+
+        print "configuring"
+        gtk.gdk.threads_leave()
 
         try:
 
@@ -332,6 +347,7 @@ class Gimpy_Camera( gtk.DrawingArea, gtk.gtkgl.Widget ):
             
         # OpenGL end
         finally:
+            gtk.gdk.threads_enter()
             gl_drawable.gl_end()
             
         return True
