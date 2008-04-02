@@ -81,7 +81,12 @@ class Assembly_Graph( Thread ):
         subgraph = Assembly_Subgraph()
         
         # get new hub from part library
+        # if hub not in parts dictionary just return
         address = event["hub"]
+        if address not in self.part_library:
+            self.LOG.warn( "can't create hub %s: not in library!"
+                           % str(address) )
+            return
         hub = self.part_library[address]
 
         # add hub to part set and subgraph
@@ -135,6 +140,12 @@ class Assembly_Graph( Thread ):
                            % str(strut_address) )
             return
         
+        # if hub not in parts dictionary just return
+        if hub_address not in self.parts:
+            self.LOG.warn( "can't connect hub %s: doesn't exist!"
+                           % str(address) )
+            return
+
         # get hub and socket
         hub = self.parts[hub_address]
         socket = hub[socket_index]
