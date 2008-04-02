@@ -9,7 +9,7 @@ class Hub_Snitch( object ):
     ACCEL_ZERO = 508
     ACCEL_G = -100.0
     UP_EPSILON = 5.0
-    UPS = 5
+    UPS = 1
 
     def __init__( self, index=None, queue=None, couple_map=None ):
         

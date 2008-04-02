@@ -32,7 +32,7 @@ class Sensor_Demon( Thread ):
        }
            
     """
-    LOG = Log( name='pyposey.hardware_demon.Sensor_Demon', level=Log.WARN )
+    LOG = Log( name='pyposey.hardware_demon.Sensor_Demon', level=Log.ERROR )
     
     TAG_PATTERN = re.compile( r'<([^<>]+)/>' )
     SOCKET_PATTERN = re.compile(
@@ -92,8 +92,9 @@ class Sensor_Demon( Thread ):
                 xml_buffer[address] = ""
 
             # get data as string and append it to input stream
-            string = "".join( chr(i) for i in packet.data )
-            string = string.replace( "\r", "" ).replace( "\n", "" ) # no \r, \n
+            string = packet.data
+            string = string.replace( "\r", "" ) # no \r
+            string = string.replace( "\n", "" ) # no \n
             xml_buffer[address] += string
             
             self.LOG.debug( "read: '%s'" % xml_buffer[address] )
@@ -118,7 +119,7 @@ class Sensor_Demon( Thread ):
                     xml_buffer[address] = ""
 
             # recover from mangled tag
-            except ValueError:
+            except (ValueError, IndexError):
                 self.LOG.warn(
                     "malformed tag: '%s'"
                     % xml_buffer[address][match.start():match.end()] )

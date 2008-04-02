@@ -65,6 +65,23 @@ class Socket( Child ):
         """
         return self._rotate_out_transform
 
+    def get_connected_hub( self ):
+        """return hub connected to this socket with a strut
+        """
+        if self.connected is None:
+            return None
+
+        # get opposite ball
+        ball = self.connected
+        strut = ball.parent
+        opposite_ball = strut[1-ball.index]
+        opposite_socket = opposite_ball.connected
+        if opposite_socket is None:
+            return None
+
+        # return hub connected to opposite ball
+        return opposite_socket.parent
+
     def _pick_coords( self ):
         """pick new current coords from set of possible coords
         """
