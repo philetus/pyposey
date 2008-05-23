@@ -69,16 +69,16 @@ class Mesh_Library( sax.handler.ContentHandler ):
         args["specular"] = self._parse_floats( str(attrs["specular"]) )
         args["shininess"] = float( str(attrs["shininess"]) )
         args["diffuse"] = self._parse_floats( str(attrs["diffuse"]) )
-        args["parent_angles"] = self._parse_float_lists(
-            str(attrs["parent_angles"]) )
-        args["parent_offsets"] = self._parse_floats(
-            str(attrs["parent_offsets"]) )
 
         if attrs.has_key( "flips" ):
             args["flips"] = float( attrs["flips"] )
         flip_axis = self._parse_option( attrs, "flip_axis" )
         if flip_axis is not None:
             args["flip_axis"] = flip_axis
+
+        args["transforms"] = None
+        if attrs.has_key( "transforms" ):
+            args["transforms"] = self._parse_transforms( str(attrs["transforms"]) )
 
         # try to open data files and create stl mesh object,
         # if mesh fails to load just print error message
@@ -111,10 +111,6 @@ class Mesh_Library( sax.handler.ContentHandler ):
         # get attributes
         args["name"] = str( attrs["name"] )
         args["part_type"] = str( attrs["part_type"] )
-        args["parent_angles"] = self._parse_float_lists(
-            str(attrs["parent_angles"]) )
-        args["parent_offsets"] = self._parse_floats(
-            str(attrs["parent_offsets"]) )
 
         flips = None
         if attrs.has_key( "flips" ):
@@ -122,6 +118,10 @@ class Mesh_Library( sax.handler.ContentHandler ):
         flip_axis = self._parse_option( attrs, "flip_axis" )
         if flip_axis is not None:
             args["flip_axis"] = flip_axis
+
+        args["transforms"] = None
+        if attrs.has_key( "transforms" ):
+            args["transforms"] = self._parse_transforms( str(attrs["transforms"]) )
 
         # try to open data files and create textured mesh object,
         # if mesh fails to load just print error message
@@ -166,6 +166,15 @@ class Mesh_Library( sax.handler.ContentHandler ):
             lists.append( tuple( float(i) for i in s.split( ", ") ) )
         return tuple( lists )
         
+    def _parse_transforms( self, string ):
+        """parse lol from string formatted as "(1.0 0.0 1.0) (0.0 0.0 3.0) ..."
+        """
+        float_lists = []
+        for match in self.LIST_PATTERN.finditer( string ):
+            l = [ float(s) for s in match.group(1).split() ]
+            float_lists.append( l )
+        return float_lists
+
     def _parse_floats( self, string ):
         return tuple( float(s) for s in string.split(", ") )
     

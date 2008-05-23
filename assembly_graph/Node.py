@@ -70,7 +70,6 @@ class Node:
         self.orientation = ( Matrix3(node.orientation) if node is not None
                              else Matrix3() )
     
-
     def _get_position( self ):
         return self.orientation.position
 

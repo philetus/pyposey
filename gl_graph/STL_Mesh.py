@@ -12,7 +12,7 @@ class STL_Mesh( object ):
     """
 
     def __init__( self, name, part_type, stl_file, thumbnail_file,
-                  specular, shininess, diffuse, parent_angles, parent_offsets,
+                  specular, shininess, diffuse, transforms,
                   scale=(1.0, 1.0, 1.0), flips=1, flip_axis=(0., 0., 1.) ):
         self.name = name
         self.part_type = part_type
@@ -26,11 +26,10 @@ class STL_Mesh( object ):
         self.diffuse = diffuse
         self.diffuse_selected = ( 0.8, 0.4, 0.1, 1.0 )
 
-        self.parent_angles = parent_angles
-        self.parent_offsets = parent_offsets
-
         self.flips = flips
         self.flip_axis = flip_axis
+
+        self.transforms = transforms
 
         # parse triangles from stl file
         self._parse_stl( stl_file, scale )

@@ -14,14 +14,13 @@ class Socket( Child ):
     X = Polar_Vector3( (1, 0, 0) )
 
     def __init__( self, parent, index, transform=None ):
-        Child.__init__( self, parent, index, transform )
 
         # list of possible (lon, lat, rot) coords
         self.coords = tuple()
         self.current_coords = (0, 0, 0)
 
-        # generate initial transforms        
-        self._build_transforms()
+        # superclass init builds initial transforms
+        Child.__init__( self, parent, index, transform )
 
     def __repr__( self ):
         return "<socket %d.%d.%d />" % self.address
@@ -54,16 +53,6 @@ class Socket( Child ):
             self.LOG.error( "disconnecting but socket not connected!" )
         self.connected.connected = None
         self.connected = None
-
-    def get_in_transform( self ):
-        """return matrix to transform from child to parent
-        """
-        return self._rotate_in_transform
-
-    def get_out_transform( self ):
-        """return matrix to transform from parent to child
-        """
-        return self._rotate_out_transform
 
     def get_connected_hub( self ):
         """return hub connected to this socket with a strut

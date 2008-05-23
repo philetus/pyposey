@@ -16,7 +16,7 @@ z = Vector3( (0, 0, 1) )
 
 a = Vector3( (1, 0, 1) )
 
-def strut_matrices():
+def strut_matrices( distance=71.5 ):
     matrices = []
     for i in range( 2 ):
         matrices.append( Matrix3() )
@@ -29,7 +29,7 @@ def strut_matrices():
     #matrices[1].rotate( 180.0, z )
 
     # translate distance to connector
-    d = Vector3( z ).multiply( 71.5 )
+    d = Vector3( z ).multiply( distance )
     for m in matrices:
         m.translate( d )
 

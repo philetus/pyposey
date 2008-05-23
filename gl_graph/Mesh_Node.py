@@ -19,7 +19,9 @@ class Mesh_Node( object ):
         self.mesh = mesh
 
         # set child transforms from mesh
-        # (not implemented)
+        if mesh.transforms is not None:
+            for child, transform in zip( self.children, mesh.transforms ):
+                child.set_transform( transform )
 
     def draw( self ):
         """call mesh to draw itself

@@ -18,7 +18,19 @@ class Child:
         self.in_transform = None
         self.out_transform = None
 
+        # generate initial transforms        
+        self._build_transforms()
+
+    def set_transform( self, transform ):
+        """set new transform to parent
+        """
+        self._transform = Matrix3( transform )
+        self._build_transforms()
+
     def _get_address( self ):
         return self.parent.address + (self.index, )
+
+    def _build_transforms( self ):
+        raise NotImplementedError()
     
     address = property( fget=_get_address )

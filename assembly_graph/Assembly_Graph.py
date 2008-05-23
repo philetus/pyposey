@@ -143,7 +143,7 @@ class Assembly_Graph( Thread ):
         # if hub not in parts dictionary just return
         if hub_address not in self.parts:
             self.LOG.warn( "can't connect hub %s: doesn't exist!"
-                           % str(address) )
+                           % str(hub_address) )
             return
 
         # get hub and socket

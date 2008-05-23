@@ -7,19 +7,19 @@ class Ball( Child ):
 
     def __init__( self, parent, index, transform=None ):
         Child.__init__( self, parent, index, transform )
-        
-        self.out_transform = self._transform
-        self.build_transforms()
-        
+                
     def __repr__( self ):
         return "<ball %d.%d.%d />" % self.address
 
-    def build_transforms( self ):
+    def _build_transforms( self ):
         """build matrix to transform from child to parent
         """
         if self._transform is None:
+            self.out_transform = None
             self.in_transform = None
             return
+
+        self.out_transform = self._transform
 
         # create transform
         transform = Matrix3()

@@ -14,15 +14,15 @@ class Textured_Mesh:
     MAX_BOUND = 1000.0
 
     def __init__( self, name, part_type, geometry_file, texture_file,
-                  thumbnail_file, parent_angles, parent_offsets,
+                  thumbnail_file, transforms,
                   flips=1, flip_axis=(0., 0., 1.) ):
         
         self.name = name
         self.part_type = part_type
-        self.parent_angles = parent_angles
-        self.parent_offsets = parent_offsets
         self.flips = flips
         self.flip_axis = flip_axis
+
+        self.transforms = transforms
         
         self.centroid = None
 
