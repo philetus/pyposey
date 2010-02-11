@@ -23,10 +23,14 @@ while queue is not None:
     # check for connect event
     if event["type"] == "couple":
         emitters = list( event["coupled_emitters"] )
-        if 0 in emitters:
-            print "<%d.%d>" % (event["socket_index"], emitters.index(0))
+        if emitters[0] is None:
+            print "x"
         else:
-            print "<%d.x>" % event["socket_index"]
+            print emitters[0]
+##        if 0 in emitters:
+##            print "<%d.%d>" % (event["socket_index"], emitters.index(0))
+##        else:
+##            print "<%d.x>" % event["socket_index"]
 
     elif event["type"] == "accelerometer":
         address = event["hub_address"]

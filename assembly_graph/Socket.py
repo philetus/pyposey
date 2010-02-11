@@ -129,7 +129,7 @@ class Socket( Child ):
         angle = self.UP.angle_to( heading )
 
         # if angle to heading is nonzero rotate angle around axis
-        if angle > self.EPSILON:
+        if angle > self.EPSILON and angle + self.EPSILON < 180.0:
             axis = Polar_Vector3( heading ).cross( self.UP )
             rotation.rotate( angle, axis )
             

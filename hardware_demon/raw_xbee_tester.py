@@ -20,6 +20,6 @@ while xbee.is_open():
 
     # get address and string from packet
     address = tuple( packet.address )
-    string = "".join( chr(i) for i in packet.data )
+    #string = "".join( chr(i) for i in packet.data )
 
-    print "%s: %s" % ( str(address), string ),
+    print "%s: %s\n\n" % ( str(address), str(packet.data) ),

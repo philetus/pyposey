@@ -117,7 +117,8 @@ class Gimpy_Graph_Window( gtk.Window ):
 
     def handle_press( self, x, y ):
         # if no keys are pressed select graph node under pointer
-        if not self.keyset:
+        if len(self.keyset) < 1:
+            self.LOG.debug( "no keys held; selecting" )
             self._select_node( x, y )
             self.redraw()
 
